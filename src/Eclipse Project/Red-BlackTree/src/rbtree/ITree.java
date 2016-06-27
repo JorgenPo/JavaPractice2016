@@ -20,6 +20,8 @@ public interface ITree<K, V> {
 		public V getValue();
 		public V setValue(V newVal);
 		
+		public K getKey();
+		
 		public INode<K,V> parent();
 		public INode<K,V> leftChild();
 		public INode<K,V> rightChild();

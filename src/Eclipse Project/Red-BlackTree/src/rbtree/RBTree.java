@@ -11,7 +11,7 @@ implements ITree<K, V> {
 		Node<K,V> mLeftChild;
 		Node<K,V> mRightChild;
 		
-		boolean mIsRed;
+		boolean mIsRed = false;
 		
 		public Node(K key, V value) {
 			mKey = key;
@@ -27,6 +27,11 @@ implements ITree<K, V> {
 		@Override
 		public V getValue() {
 			return mValue;
+		}
+		
+		@Override
+		public K getKey() {
+			return mKey;
 		}
 
 		@Override
@@ -56,6 +61,24 @@ implements ITree<K, V> {
 			return mIsRed;
 		}
 		
+		public boolean equals(Object o) {
+			if (!(o instanceof ITree.INode)) {
+				return false;
+			}
+			ITree.INode<?, ?> e = (ITree.INode<?, ?>)o;
+			
+			return valEquals(mKey, e.getKey()) && valEquals(mValue, e.getValue());
+		}
+		
+		public int hashCode() {
+			int keyHash = (mKey == null ? 0 : mKey.hashCode());
+			int valHash = (mValue == null ? 0 : mValue.hashCode());
+			return keyHash ^ valHash;
+		}
+		
+		public String toString() {
+			return mKey + " = " + mValue;
+		}
 	}
 	
 	@Override
@@ -124,4 +147,8 @@ implements ITree<K, V> {
 		return null;
 	}
 
+	// Util methods
+	static final boolean valEquals(Object val1, Object val2) {
+		return (val1 == null ? val2 == null : val1.equals(val2));
+	}
 }
