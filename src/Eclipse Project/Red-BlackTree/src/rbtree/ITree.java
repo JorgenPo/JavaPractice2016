@@ -34,8 +34,8 @@ public interface ITree<K, V> {
 	
 	public INode<K,V> getRoot();
 	
-	public void addNode(INode<K,V> node);
-	public void addNode(K key, V value);
+	public V addNode(INode<K,V> node);
+	public V addNode(K key, V value);
 	
 	public void deleteNode(INode<K,V> node);
 	public void deleteNode(K key);
