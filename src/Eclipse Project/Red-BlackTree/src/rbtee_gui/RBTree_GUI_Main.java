@@ -11,6 +11,7 @@ import javafx.scene.canvas.*;
 import javafx.scene.shape.*;
 import javafx.scene.paint.*;
 import javafx.scene.text.*;
+import rbtree.*;
 
 /**
  * GUI of application.
@@ -34,6 +35,14 @@ public class RBTree_GUI_Main extends Application {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		// Test of RBTree (temp)
+		RBTree<String, String> tree = new RBTree<>();
+		System.out.println("Initial size of tree: " + tree.getSize());
+		tree.put("Key", "Value");
+		tree.put("Foo", "Bar");
+		tree.put("Hello", "Tree");
+		System.out.println("Size of tree after insertation: " + tree.getSize());
+		
 		launch(args);
 	}
 	
