@@ -34,11 +34,10 @@ public interface ITree<K, V> {
 	
 	public INode<K,V> getRoot();
 	
-	public V addNode(INode<K,V> node);
-	public V addNode(K key, V value);
+	public V put(K key, V value);
 	
-	public void deleteNode(INode<K,V> node);
-	public void deleteNode(K key);
+	public void remove(INode<K,V> node);
+	public void remove(K key);
 	
 	public boolean containsKey(K key);
 	public boolean containsValue(V val);
