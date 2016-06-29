@@ -95,14 +95,9 @@ implements ITree<K, V> {
 		return mRoot;
 	}
 
-	@Override
-	public V addNode(INode<K, V> node) {
-		return addNode(node.getKey(), node.getValue());
-	}
-
 	@SuppressWarnings("unchecked")
 	@Override
-	public V addNode(K key, V value) {
+	public V put(K key, V value) {
 		Node<K,V> r = mRoot;
 		
 		if (r == null) {	// First case - insert to empty tree
@@ -155,19 +150,19 @@ implements ITree<K, V> {
 			parent.mRightChild = n;
 		}
 		
-		balanceTree(n);
+		balanceAfterInsertion(n);
 		++mSize;
 		return null;
 	}
 
 	@Override
-	public void deleteNode(INode<K, V> node) {
+	public void remove(INode<K, V> node) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void deleteNode(K key) {
+	public void remove(K key) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -283,12 +278,118 @@ implements ITree<K, V> {
 		return (val1 == null ? val2 == null : val1.equals(val2));
 	}
 	
+	// Balancing methods
+	
+	private static <K,V> boolean isRed(Node<K,V> p) {
+		return p == null ? false : p.mIsRed;
+	}
+	
+	private static <K,V> Node<K,V> parentOf(Node<K,V> p) {
+		return p == null ? null : p.mParent;
+	}
+	
+	private static <K,V> void setRed(Node<K,V> p, boolean b) {
+		if (p != null) {
+			p.mIsRed = b;
+		}
+	}
+	
+	private static <K,V> Node<K,V> leftOf(Node<K,V> p) {
+		return p == null ? null : p.mLeftChild;
+	}
+	
+	private static <K,V> Node<K,V> rightOf(Node<K,V> p) {
+		return p == null ? null : p.mRightChild;
+	}
+
+	private void rotateLeft(Node<K,V> x) {
+		if (x != null) {
+			Node<K,V> q = x.mRightChild;
+		
+			x.mRightChild = q.mLeftChild;
+			if (q.mLeftChild != null) {
+				q.mLeftChild.mParent = x;
+			}
+			
+			q.mParent = x.mParent;
+			if (x.mParent == null) {	//If x - root element
+				mRoot = q;
+			} else if (x.mParent.mLeftChild == x) {	//If x - left child
+				x.mParent.mLeftChild = q;
+			} else {
+				x.mParent.mRightChild = q;
+			}
+			
+			q.mLeftChild = x;
+			x.mParent = q;
+		}
+	}
+	
+	private void rotateRight(Node<K,V> x) {
+		if (x != null) {
+			Node<K,V> q = x.mLeftChild;
+		
+			x.mLeftChild = q.mRightChild;
+			if (q.mRightChild != null) {
+				q.mRightChild.mParent = x;
+			}
+			
+			q.mParent = x.mParent;
+			if (x.mParent == null) {	//If x - root element
+				mRoot = q;
+			} else if (x.mParent.mLeftChild == x) {	//If x - left child
+				x.mParent.mLeftChild = q;
+			} else {
+				x.mParent.mRightChild = q;
+			}
+			
+			q.mRightChild = x;
+			x.mParent = q;
+		}
+	}
 	/**
 	 * Balances tree after insertion.
 	 * 
 	 * @param x root of the tree to balance.
 	 */
-	private void balanceTree(Node<K,V> x) {
+	private void balanceAfterInsertion(Node<K,V> x) {
+		x.mIsRed = true;
 		
+		while (x != null && x != mRoot && x.mParent.mIsRed) {
+			if (parentOf(x) == leftOf(parentOf(parentOf(x)))) {
+				Node<K,V> u = rightOf(parentOf(parentOf(x)));	// Uncle
+				if (isRed(u)) {	
+					setRed(parentOf(x), false);
+					setRed(u, false);
+					setRed(parentOf(parentOf(x)), true);
+					x = parentOf(parentOf(x));	// If grandpa is red, we should do this proc for him
+				} else {
+					if (x == rightOf(parentOf(x))) { // If x - right child of Parent 
+						x = parentOf(x);
+						rotateLeft(x);	
+					}	
+					setRed(parentOf(x), false);
+					setRed(parentOf(parentOf(x)), true);
+					rotateRight(parentOf(parentOf(x)));
+				}
+			} else { // Same thing, just symmetric
+				Node<K,V> u = leftOf(parentOf(parentOf(x)));	// Uncle
+				if (isRed(u)) {	
+					setRed(parentOf(x), false);
+					setRed(u, false);
+					setRed(parentOf(parentOf(x)), true);
+					x = parentOf(parentOf(x));	// If grandpa is red, we should do this proc for him
+				} else {
+					if (x == leftOf(parentOf(x))) { // If x - right child of Parent 
+						x = parentOf(x);
+						rotateRight(x);	
+					}	
+					setRed(parentOf(x), false);
+					setRed(parentOf(parentOf(x)), true);
+					rotateLeft(parentOf(parentOf(x)));
+				}
+			}
+		}
+		mRoot.mIsRed = false;
 	}
 }
