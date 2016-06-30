@@ -14,6 +14,9 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.Group;
+
+import java.util.HashMap;
+
 import javafx.geometry.Insets;
 import rbtree.*;
 import rbtree.ITree.INode;
@@ -43,6 +46,8 @@ public class RBTreePane extends BorderPane {
 
 	private RBTree<String, String> mainTree;
 
+	private HashMap<String, Integer> keyIndex;
+	
 	// TODO Delete it. Test items.
 	private Button testBtnChangeColor;
 	private VertexGroup testVertexGroup;
@@ -56,7 +61,8 @@ public class RBTreePane extends BorderPane {
 		System.out.println("Method (start).");
 
 		mainTree = new RBTree<>();
-
+		keyIndex = new HashMap<>();
+		
 		toolBar = makeToolBar();
 		hbStatusBar = makeStatusBar();
 		vbCenter = makeNodeCenter();
@@ -234,7 +240,7 @@ public class RBTreePane extends BorderPane {
 		testBtnChangeColor = new Button("Test");
 		testBtnChangeColor.setMaxWidth(Double.MAX_VALUE);
 		testBtnChangeColor.setOnAction((ae) -> {
-			if (colorIdx == 0) {
+			/*if (colorIdx == 0) {
 				// graphicGroup.getChildren().clear();
 				double radius = getWidth() < getHeight() ? (getWidth() / countItemsAtRow)
 						: (getHeight() / countItemsAtRow);
@@ -244,6 +250,9 @@ public class RBTreePane extends BorderPane {
 			} else {
 				if (!txtFieldKey.getText().isEmpty())
 					testVertexGroup.setCenterX(Double.valueOf(txtFieldKey.getText()));
+			}*/
+			if (!txtFieldKey.getText().isEmpty()) {
+				System.out.println(keyIndex.get(txtFieldKey.getText()));
 			}
 		});
 		// Text area
@@ -312,7 +321,9 @@ public class RBTreePane extends BorderPane {
 
 	private void preOrder(INode<String, String> iNode, double center, double width, double radius) {
 		System.out.println(center);
-		graphicGroup.getChildren().add(new VertexGroup(iNode, countHeight, center, radius));
+		VertexGroup vert = new VertexGroup(iNode, countHeight, center, radius);
+		graphicGroup.getChildren().add(vert);
+		keyIndex.put(iNode.getKey(), graphicGroup.getChildren().indexOf(vert));
 		if (iNode.leftChild() != null) {
 			countHeight++;
 			preOrder(iNode.leftChild(), (center - width / Math.pow(2, countHeight)), width, radius);
