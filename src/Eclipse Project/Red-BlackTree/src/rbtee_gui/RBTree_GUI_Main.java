@@ -1,7 +1,16 @@
 package rbtee_gui;
 
+import java.util.Random;
+
 import javafx.application.*;
 import javafx.scene.Scene;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontPosture;
+import javafx.scene.text.FontSmoothingType;
+import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import rbtree.*;
 
@@ -11,7 +20,7 @@ import rbtree.*;
  * @author comaralex
  */
 public class RBTree_GUI_Main extends Application {
-	
+
 	/**
 	 * Method main.
 	 * 
@@ -25,29 +34,29 @@ public class RBTree_GUI_Main extends Application {
 		tree.put("Foo", "Bar");
 		tree.put("Hello", "Tree");
 		System.out.println("Size of tree after insertation: " + tree.getSize());
-		
+
 		launch(args);
 	}
-	
+
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		System.out.println("Method (main start).");
 
 		primaryStage.setTitle("Red-Black tree visual editor");
-		
+
 		RBTreePane primaryPane = new RBTreePane();
 		Scene primaryScene = new Scene(primaryPane);
 		primaryStage.setScene(primaryScene);
-		
+
 		primaryPane.start();
 		primaryStage.show();
 	}
-	
+
 	// If need initialization of parameters at starting.
 	public void init() {
 		System.out.println("Method (init).");
 	}
-	
+
 	// If need add actions after stopping application.
 	public void stop() {
 		System.out.println("Method (stop).");
