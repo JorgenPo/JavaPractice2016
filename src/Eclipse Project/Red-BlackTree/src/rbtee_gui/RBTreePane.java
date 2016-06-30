@@ -338,7 +338,7 @@ public class RBTreePane extends BorderPane {
 		}
 	}
 
-	private void setSelectedByKey(String key) {
+	public void setSelectedByKey(String key) {
 		VertexGroup vert = (VertexGroup) graphicGroup.getChildren().get(keyIndex.get(key));
 		vert.setSelected();
 	}

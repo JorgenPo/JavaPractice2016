@@ -1,5 +1,7 @@
 package rbtree;
 
+import rbtee_gui.RBTreePane;
+
 /**
  * Tree-like data structure interface.
  * 
@@ -33,6 +35,7 @@ public interface ITree<K, V> {
 	}
 	
 	public INode<K,V> getRoot();
+	public void setRBTreePane(RBTreePane treePane);
 	
 	public V put(K key, V value);
 	
