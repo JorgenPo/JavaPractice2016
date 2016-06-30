@@ -1,7 +1,9 @@
 package rbtree;
 
 import java.util.Comparator;
+import java.util.Stack;
 
+import javafx.application.Platform;
 import rbtee_gui.RBTreePane;
 
 public class RBTree<K, V> implements ITree<K, V> {
@@ -14,7 +16,7 @@ public class RBTree<K, V> implements ITree<K, V> {
 	public RBTree() {
 		mComparator = null;
 	}
-	
+
 	public void setRBTreePane(RBTreePane treePane) {
 		this.treePane = treePane;
 	}
@@ -238,9 +240,22 @@ public class RBTree<K, V> implements ITree<K, V> {
 		Node<K, V> node = mRoot;
 		while (node != null) {
 			if (treePane != null) {
-				treePane.setSelectedByKey(node.getKey().toString());;
+				final String currentKey = node.getKey().toString();
+				treePane.setSelectedByKey(currentKey);
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+						try {
+							Thread.sleep(500);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						treePane.setSelectedByKey(currentKey);
+					}
+				}).start();
 			}
-			
+
 			int cmp = key.compareTo(node.mKey);
 			if (cmp < 0) {
 				node = node.mLeftChild;
