@@ -61,6 +61,8 @@ public class RBTreePane extends BorderPane {
 		System.out.println("Method (start).");
 
 		mainTree = new RBTree<>();
+		mainTree.setRBTreePane(this);
+
 		keyIndex = new HashMap<>();
 
 		toolBar = makeToolBar();
@@ -237,7 +239,7 @@ public class RBTreePane extends BorderPane {
 		btnGetElement = new Button("Get element...");
 		btnGetElement.setMaxWidth(Double.MAX_VALUE);
 		// TODO Delete it. Testing button_changeColor
-		testBtnChangeColor = new Button("Test");
+		testBtnChangeColor = new Button("TESTING");
 		testBtnChangeColor.setMaxWidth(Double.MAX_VALUE);
 		testBtnChangeColor.setOnAction((ae) -> {
 			/*
@@ -252,9 +254,16 @@ public class RBTreePane extends BorderPane {
 			 * ; }
 			 */
 			if (!txtFieldKey.getText().isEmpty()) {
-				System.out.println(keyIndex.get(txtFieldKey.getText()));
-				VertexGroup vert = (VertexGroup) graphicGroup.getChildren().get(keyIndex.get(txtFieldKey.getText()));
-				vert.setSelected();
+				//System.out.println(keyIndex.get(txtFieldKey.getText()));
+				//VertexGroup vert = (VertexGroup) graphicGroup.getChildren().get(keyIndex.get(txtFieldKey.getText()));
+				mainTree.containsKey(txtFieldKey.getText());
+			}
+		});
+		Button btnContainsKey = new Button("Contains key?");
+		btnContainsKey.setMaxWidth(Double.MAX_VALUE);
+		btnContainsKey.setOnAction((ae) -> {
+			if (!txtFieldKey.getText().isEmpty()) {
+				mainTree.containsKey(txtFieldKey.getText());
 			}
 		});
 		// Text area
@@ -294,7 +303,7 @@ public class RBTreePane extends BorderPane {
 		leftPane.setVgap(8);
 		leftPane.setAlignment(Pos.BASELINE_CENTER);
 		leftPane.getChildren().addAll(hbLeftKey, hbLeftValue, separatorFieldsButtons, btnAddElement, btnGetElement,
-				testBtnChangeColor, txtArea);
+				testBtnChangeColor, btnContainsKey, txtArea);
 		leftPane.setMinHeight(409);
 		return leftPane;
 	}
@@ -338,7 +347,7 @@ public class RBTreePane extends BorderPane {
 		}
 	}
 
-	private void setSelectedByKey(String key) {
+	public void setSelectedByKey(String key) {
 		VertexGroup vert = (VertexGroup) graphicGroup.getChildren().get(keyIndex.get(key));
 		vert.setSelected();
 	}

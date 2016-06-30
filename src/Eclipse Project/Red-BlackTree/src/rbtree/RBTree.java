@@ -2,14 +2,21 @@ package rbtree;
 
 import java.util.Comparator;
 
+import rbtee_gui.RBTreePane;
+
 public class RBTree<K, V> implements ITree<K, V> {
 
 	private Node<K, V> mRoot = null;
 	private int mSize = 0;
 	private final Comparator<? super K> mComparator;
+	private RBTreePane treePane;
 
 	public RBTree() {
 		mComparator = null;
+	}
+	
+	public void setRBTreePane(RBTreePane treePane) {
+		this.treePane = treePane;
 	}
 
 	public RBTree(Comparator<? super K> comparator) {
@@ -230,6 +237,10 @@ public class RBTree<K, V> implements ITree<K, V> {
 
 		Node<K, V> node = mRoot;
 		while (node != null) {
+			if (treePane != null) {
+				treePane.setSelectedByKey(node.getKey().toString());;
+			}
+			
 			int cmp = key.compareTo(node.mKey);
 			if (cmp < 0) {
 				node = node.mLeftChild;
