@@ -1,18 +1,9 @@
 package rbtee_gui;
 
-import java.util.Random;
-
-import javafx.application.*;
+import javafx.application.Application;
 import javafx.scene.Scene;
-import javafx.scene.effect.DropShadow;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontPosture;
-import javafx.scene.text.FontSmoothingType;
-import javafx.scene.text.FontWeight;
-import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import rbtree.*;
+import rbtree.RBTree;
 
 /**
  * GUI of application.
