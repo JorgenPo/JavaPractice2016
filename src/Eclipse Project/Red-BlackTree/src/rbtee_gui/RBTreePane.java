@@ -47,7 +47,7 @@ public class RBTreePane extends BorderPane {
 	private RBTree<String, String> mainTree;
 
 	private HashMap<String, Integer> keyIndex;
-	
+
 	// TODO Delete it. Test items.
 	private Button testBtnChangeColor;
 	private VertexGroup testVertexGroup;
@@ -62,7 +62,7 @@ public class RBTreePane extends BorderPane {
 
 		mainTree = new RBTree<>();
 		keyIndex = new HashMap<>();
-		
+
 		toolBar = makeToolBar();
 		hbStatusBar = makeStatusBar();
 		vbCenter = makeNodeCenter();
@@ -240,19 +240,21 @@ public class RBTreePane extends BorderPane {
 		testBtnChangeColor = new Button("Test");
 		testBtnChangeColor.setMaxWidth(Double.MAX_VALUE);
 		testBtnChangeColor.setOnAction((ae) -> {
-			/*if (colorIdx == 0) {
-				// graphicGroup.getChildren().clear();
-				double radius = getWidth() < getHeight() ? (getWidth() / countItemsAtRow)
-						: (getHeight() / countItemsAtRow);
-				testVertexGroup = new VertexGroup(mainTree.getRoot(), countHeight, getWidth(), radius);
-				graphicGroup.getChildren().add(testVertexGroup);
-				colorIdx++;
-			} else {
-				if (!txtFieldKey.getText().isEmpty())
-					testVertexGroup.setCenterX(Double.valueOf(txtFieldKey.getText()));
-			}*/
+			/*
+			 * if (colorIdx == 0) { // graphicGroup.getChildren().clear();
+			 * double radius = getWidth() < getHeight() ? (getWidth() /
+			 * countItemsAtRow) : (getHeight() / countItemsAtRow);
+			 * testVertexGroup = new VertexGroup(mainTree.getRoot(),
+			 * countHeight, getWidth(), radius);
+			 * graphicGroup.getChildren().add(testVertexGroup); colorIdx++; }
+			 * else { if (!txtFieldKey.getText().isEmpty())
+			 * testVertexGroup.setCenterX(Double.valueOf(txtFieldKey.getText()))
+			 * ; }
+			 */
 			if (!txtFieldKey.getText().isEmpty()) {
 				System.out.println(keyIndex.get(txtFieldKey.getText()));
+				VertexGroup vert = (VertexGroup) graphicGroup.getChildren().get(keyIndex.get(txtFieldKey.getText()));
+				vert.setSelected();
 			}
 		});
 		// Text area
@@ -334,5 +336,10 @@ public class RBTreePane extends BorderPane {
 			preOrder(iNode.rightChild(), (center + width / Math.pow(2, countHeight)), width, radius);
 			countHeight--;
 		}
+	}
+
+	private void setSelectedByKey(String key) {
+		VertexGroup vert = (VertexGroup) graphicGroup.getChildren().get(keyIndex.get(key));
+		vert.setSelected();
 	}
 }

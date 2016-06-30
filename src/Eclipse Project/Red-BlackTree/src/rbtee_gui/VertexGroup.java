@@ -12,8 +12,8 @@ public class VertexGroup extends Group {
 	private double centerX, centerY;
 	private double size;
 
-	private String key = "def";
-	private String value = "def";
+	private String key = "NIL";
+	private String value = "NIL";
 	private Color color = Color.BLACK;
 
 	private Ellipse ellipse = null;
@@ -31,6 +31,20 @@ public class VertexGroup extends Group {
 			rect.setX(centerX);
 		if (txt != null)
 			txt.setX(centerX);
+	}
+
+	public void setSelected() {
+		if (color == Color.BLACK) {
+			color = Color.GREY;
+		} else if (color == Color.GREY) {
+			color = Color.BLACK;
+		} else if (color == Color.RED) {
+			color = Color.PINK;
+		} else if (color == Color.PINK) {
+			color = Color.RED;
+		}
+		if (ellipse != null)
+			ellipse.setFill(color);
 	}
 
 	public VertexGroup(INode<String, String> iNode, int countHeight, double center, double radius) {
