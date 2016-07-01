@@ -2,6 +2,7 @@ package rbtee_gui;
 
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Ellipse;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
@@ -36,10 +37,16 @@ public class VertexGroup extends Group {
 	public void setSelected() {
 		if (color == Color.BLACK) {
 			color = Color.GREY;
-		} else if (color == Color.GREY) {
-			color = Color.BLACK;
 		} else if (color == Color.RED) {
 			color = Color.PINK;
+		}
+		if (ellipse != null)
+			ellipse.setFill(color);
+	}
+
+	public void reset() {
+		if (color == Color.GREY) {
+			color = Color.BLACK;
 		} else if (color == Color.PINK) {
 			color = Color.RED;
 		}

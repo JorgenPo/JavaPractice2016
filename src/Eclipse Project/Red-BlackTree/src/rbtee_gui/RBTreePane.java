@@ -4,19 +4,29 @@ import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToolBar;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 import javafx.scene.Group;
 
 import java.util.HashMap;
 
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import rbtree.*;
 import rbtree.ITree.INode;
@@ -57,12 +67,12 @@ public class RBTreePane extends BorderPane {
 	 * 
 	 * @throws Exception
 	 */
-	public void start() throws Exception {
+	public void start(Stage primaryStage) throws Exception {
 		System.out.println("Method (start).");
 
 		mainTree = new RBTree<>();
 		mainTree.setRBTreePane(this);
-
+		graphicGroup = new Group();
 		keyIndex = new HashMap<>();
 
 		toolBar = makeToolBar();
@@ -74,6 +84,7 @@ public class RBTreePane extends BorderPane {
 		hbLeft = new HBox();
 		hbLeft.getChildren().addAll(vbLeft, separatorLeftCenter);
 
+		getChildren().setAll(createMenuBar(primaryStage, graphicGroup));
 		setLayouts();
 	}
 
@@ -106,6 +117,54 @@ public class RBTreePane extends BorderPane {
 		return statusBar;
 	}
 
+	private MenuBar createMenuBar(final Stage stage, final Group group) {
+		Menu fileMenu = new Menu("_File");
+		MenuItem exitMenuItem = new MenuItem("_Exit");
+		exitMenuItem.setGraphic(new ImageView(new Image(CLOSE_ICON)));
+		exitMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				stage.close();
+			}
+		});
+		fileMenu.getItems().setAll(exitMenuItem);
+		Menu zoomMenu = new Menu("_Zoom");
+		MenuItem zoomResetMenuItem = new MenuItem("Zoom _Reset");
+		zoomResetMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.ESCAPE));
+		zoomResetMenuItem.setGraphic(new ImageView(new Image(ZOOM_RESET_ICON)));
+		zoomResetMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				group.setScaleX(1);
+				group.setScaleY(1);
+			}
+		});
+		MenuItem zoomInMenuItem = new MenuItem("Zoom _In");
+		zoomInMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.I));
+		zoomInMenuItem.setGraphic(new ImageView(new Image(ZOOM_IN_ICON)));
+		zoomInMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				group.setScaleX(group.getScaleX() * 1.5);
+				group.setScaleY(group.getScaleY() * 1.5);
+			}
+		});
+		MenuItem zoomOutMenuItem = new MenuItem("Zoom _Out");
+		zoomOutMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.O));
+		zoomOutMenuItem.setGraphic(new ImageView(new Image(ZOOM_OUT_ICON)));
+		zoomOutMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				group.setScaleX(group.getScaleX() * 1 / 1.5);
+				group.setScaleY(group.getScaleY() * 1 / 1.5);
+			}
+		});
+		zoomMenu.getItems().setAll(zoomResetMenuItem, zoomInMenuItem, zoomOutMenuItem);
+		MenuBar menuBar = new MenuBar();
+		menuBar.getMenus().setAll(fileMenu, zoomMenu);
+		return menuBar;
+	}
+
 	/**
 	 * Creates and returns tool bar of application. Locates certain items in the
 	 * center pane.
@@ -116,12 +175,14 @@ public class RBTreePane extends BorderPane {
 		// Open file with data for tree painting.
 		btnOpenFile = new Button("Open...");
 		btnOpenFile.setOnAction((ae) -> {
+			resetTree();
 			labelStatus.setText("Open file clicked.");
 			// TODO Add method Open file.
 		});
 		// Save data of current tree to the file.
 		btnSaveToFile = new Button("Save...");
 		btnSaveToFile.setOnAction((ae) -> {
+			resetTree();
 			labelStatus.setText("Save to file clicked.");
 			// TODO Add method Save to file.
 		});
@@ -133,12 +194,14 @@ public class RBTreePane extends BorderPane {
 		// Start visualization of tree.
 		btnStepPrev = new Button("<<");
 		btnStepPrev.setOnAction((ae) -> {
+			resetTree();
 			labelStatus.setText("Previous step clicked.");
 			// TODO Add method Previous step.
 		});
 		// Start visualization of tree.
 		btnStepNext = new Button(">>");
 		btnStepNext.setOnAction((ae) -> {
+			resetTree();
 			labelStatus.setText("Next step clicked.");
 			// TODO Add method Next step.
 		});
@@ -147,6 +210,7 @@ public class RBTreePane extends BorderPane {
 		// Start visualization of tree.
 		btnReset = new Button("Reset");
 		btnReset.setOnAction((ae) -> {
+			resetTree();
 			labelStatus.setText("Reset clicked.");
 			// TODO Add method Next step.
 		});
@@ -175,7 +239,6 @@ public class RBTreePane extends BorderPane {
 		 * gc.fillOval(0, 0, 20, 20); gc.fillRect(100, 320, 300, 40);
 		 * gc.setFont(new Font(20)); gc.fillText("Text", 60, 50);
 		 */
-		graphicGroup = new Group();
 
 		/*
 		 * TODO Delete it. Check before. Really exciting. Example.
@@ -242,6 +305,7 @@ public class RBTreePane extends BorderPane {
 		testBtnChangeColor = new Button("TESTING");
 		testBtnChangeColor.setMaxWidth(Double.MAX_VALUE);
 		testBtnChangeColor.setOnAction((ae) -> {
+			resetTree();
 			/*
 			 * if (colorIdx == 0) { // graphicGroup.getChildren().clear();
 			 * double radius = getWidth() < getHeight() ? (getWidth() /
@@ -254,14 +318,16 @@ public class RBTreePane extends BorderPane {
 			 * ; }
 			 */
 			if (!txtFieldKey.getText().isEmpty()) {
-				//System.out.println(keyIndex.get(txtFieldKey.getText()));
-				//VertexGroup vert = (VertexGroup) graphicGroup.getChildren().get(keyIndex.get(txtFieldKey.getText()));
+				// System.out.println(keyIndex.get(txtFieldKey.getText()));
+				// VertexGroup vert = (VertexGroup)
+				// graphicGroup.getChildren().get(keyIndex.get(txtFieldKey.getText()));
 				mainTree.containsKey(txtFieldKey.getText());
 			}
 		});
 		Button btnContainsKey = new Button("Contains key?");
 		btnContainsKey.setMaxWidth(Double.MAX_VALUE);
 		btnContainsKey.setOnAction((ae) -> {
+			resetTree();
 			if (!txtFieldKey.getText().isEmpty()) {
 				mainTree.containsKey(txtFieldKey.getText());
 			}
@@ -274,6 +340,7 @@ public class RBTreePane extends BorderPane {
 
 		// Actions
 		btnAddElement.setOnAction((ae) -> {
+			resetTree();
 			labelStatus.setText("Button AddElement was pressed.");
 			if ((txtFieldKey.getText().isEmpty()) || (txtFieldValue.getText().isEmpty())) {
 				labelStatus.setText("Error when try AddElement. Please check Key or Value!");
@@ -285,6 +352,7 @@ public class RBTreePane extends BorderPane {
 			}
 		});
 		btnGetElement.setOnAction((ae) -> {
+			resetTree();
 			labelStatus.setText("Button GetElement was pressed.");
 			if (txtFieldKey.getText().isEmpty()) {
 				labelStatus.setText("Error when try GetElement. Please check Key!");
@@ -339,10 +407,22 @@ public class RBTreePane extends BorderPane {
 			countHeight++;
 			preOrder(iNode.leftChild(), (center - width / Math.pow(2, countHeight)), width, radius);
 			countHeight--;
+		} else {
+			countHeight++;
+			VertexGroup vertNull = new VertexGroup(null, countHeight, (center - width / Math.pow(2, countHeight)),
+					radius);
+			countHeight--;
+			graphicGroup.getChildren().add(vertNull);
 		}
 		if (iNode.rightChild() != null) {
 			countHeight++;
 			preOrder(iNode.rightChild(), (center + width / Math.pow(2, countHeight)), width, radius);
+			countHeight--;
+		} else {
+			countHeight++;
+			VertexGroup vertNull = new VertexGroup(null, countHeight, (center + width / Math.pow(2, countHeight)),
+					radius);
+			graphicGroup.getChildren().add(vertNull);
 			countHeight--;
 		}
 	}
@@ -351,4 +431,19 @@ public class RBTreePane extends BorderPane {
 		VertexGroup vert = (VertexGroup) graphicGroup.getChildren().get(keyIndex.get(key));
 		vert.setSelected();
 	}
+
+	private void resetTree() {
+		if (graphicGroup.getChildren().isEmpty())
+			return;
+		for (int i = 0; i < graphicGroup.getChildren().size(); i++) {
+			VertexGroup vert = (VertexGroup) graphicGroup.getChildren().get(i);
+			vert.reset();
+		}
+	}
+	
+	public static final String APP_ICON = "http://icons.iconarchive.com/icons/deleket/soft-scraps/128/Zoom-icon.png";
+	public static final String ZOOM_RESET_ICON = "http://icons.iconarchive.com/icons/deleket/soft-scraps/24/Zoom-icon.png";
+	public static final String ZOOM_OUT_ICON = "http://icons.iconarchive.com/icons/deleket/soft-scraps/24/Zoom-Out-icon.png";
+	public static final String ZOOM_IN_ICON = "http://icons.iconarchive.com/icons/deleket/soft-scraps/24/Zoom-In-icon.png";
+	public static final String CLOSE_ICON = "http://icons.iconarchive.com/icons/deleket/soft-scraps/24/Button-Close-icon.png";
 }

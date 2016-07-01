@@ -36,10 +36,11 @@ public class RBTree_GUI_Main extends Application {
 		primaryStage.setTitle("Red-Black tree visual editor");
 
 		RBTreePane primaryPane = new RBTreePane();
+		primaryPane.start(primaryStage);
 		Scene primaryScene = new Scene(primaryPane);
 		primaryStage.setScene(primaryScene);
 
-		primaryPane.start();
+		
 		primaryStage.show();
 	}
 
