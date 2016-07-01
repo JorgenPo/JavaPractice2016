@@ -22,6 +22,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.scene.Group;
+import javafx.scene.Node;
+import javafx.scene.Parent;
 
 import java.util.HashMap;
 
@@ -30,6 +32,7 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import rbtree.*;
 import rbtree.ITree.INode;
+import images.*;
 
 /**
  * TODO Add declaration. GUI Class ...
@@ -39,20 +42,20 @@ import rbtree.ITree.INode;
 public class RBTreePane extends BorderPane {
 
 	private ToolBar toolBar;
-	private FlowPane vbLeft;
 	private VBox vbCenter;
 	private HBox hbLeft, hbStatusBar;
+	private FlowPane vbLeft;
 
 	private Label labelStatus;
-	private Button btnAddElement, btnGetElement;
-	private Button btnOpenFile, btnSaveToFile, btnStepPrev, btnStepNext, btnReset;
+	private Separator separatorFieldsButtons;
+	private Button btnAddElement, btnGetElement, btnStepPrev, btnStepNext;
+	private Button btnOpenFile, btnSaveToFile, btnLockToolBar;
 	private ToggleButton btnVisualize;
 	private TextField txtFieldKey, txtFieldValue;
 	private TextArea txtArea;
 
 	// For graphics
 	private Group graphicGroup;
-	private int colorIdx = 0;
 
 	private RBTree<String, String> mainTree;
 
@@ -60,14 +63,13 @@ public class RBTreePane extends BorderPane {
 
 	// TODO Delete it. Test items.
 	private Button testBtnChangeColor;
-	private VertexGroup testVertexGroup;
 
 	/**
 	 * TODO Add declaration of starting method.
 	 * 
 	 * @throws Exception
 	 */
-	public void start(Stage primaryStage) throws Exception {
+	public void start(final Stage primaryStage) throws Exception {
 		System.out.println("Method (start).");
 
 		mainTree = new RBTree<>();
@@ -84,15 +86,14 @@ public class RBTreePane extends BorderPane {
 		hbLeft = new HBox();
 		hbLeft.getChildren().addAll(vbLeft, separatorLeftCenter);
 
-		getChildren().setAll(createMenuBar(primaryStage, graphicGroup));
-		setLayouts();
+		setLayouts(primaryStage);
 	}
 
 	/**
 	 * Locates panes in the right place.
 	 */
-	private void setLayouts() {
-		setTop(toolBar);
+	private void setLayouts(final Stage primaryStage) {
+		setTop(new VBox(createMenuBar(primaryStage, graphicGroup), toolBar));
 		setLeft(hbLeft);
 		setCenter(vbCenter);
 		setBottom(hbStatusBar);
@@ -105,59 +106,49 @@ public class RBTreePane extends BorderPane {
 	 * @return status bar of application
 	 */
 	private HBox makeStatusBar() {
-		// Label
 		labelStatus = new Label("Status bar...");
 
 		HBox statusBar = new HBox();
-		statusBar.setPrefHeight(35);
-		statusBar.setMinHeight(35);
-		statusBar.setPadding(new Insets(5, 20, 5, 5));
+		statusBar.setPrefHeight(30);
+		statusBar.setMinHeight(30);
+		statusBar.setPadding(new Insets(5, 5, 5, 5));
 		statusBar.getChildren().addAll(labelStatus);
 
 		return statusBar;
 	}
 
+	/**
+	 * Creates and returns menu bar of application.
+	 * 
+	 * @return menu bar of application
+	 */
 	private MenuBar createMenuBar(final Stage stage, final Group group) {
 		Menu fileMenu = new Menu("_File");
 		MenuItem exitMenuItem = new MenuItem("_Exit");
 		exitMenuItem.setGraphic(new ImageView(new Image(CLOSE_ICON)));
-		exitMenuItem.setOnAction(new EventHandler<ActionEvent>() {
-			@Override
-			public void handle(ActionEvent event) {
-				stage.close();
-			}
-		});
+		exitMenuItem.setOnAction((ae) -> stage.close());
 		fileMenu.getItems().setAll(exitMenuItem);
 		Menu zoomMenu = new Menu("_Zoom");
 		MenuItem zoomResetMenuItem = new MenuItem("Zoom _Reset");
 		zoomResetMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.ESCAPE));
 		zoomResetMenuItem.setGraphic(new ImageView(new Image(ZOOM_RESET_ICON)));
-		zoomResetMenuItem.setOnAction(new EventHandler<ActionEvent>() {
-			@Override
-			public void handle(ActionEvent event) {
-				group.setScaleX(1);
-				group.setScaleY(1);
-			}
+		zoomResetMenuItem.setOnAction((ae) -> {
+			group.setScaleX(1);
+			group.setScaleY(1);
 		});
 		MenuItem zoomInMenuItem = new MenuItem("Zoom _In");
 		zoomInMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.I));
 		zoomInMenuItem.setGraphic(new ImageView(new Image(ZOOM_IN_ICON)));
-		zoomInMenuItem.setOnAction(new EventHandler<ActionEvent>() {
-			@Override
-			public void handle(ActionEvent event) {
-				group.setScaleX(group.getScaleX() * 1.5);
-				group.setScaleY(group.getScaleY() * 1.5);
-			}
+		zoomInMenuItem.setOnAction((ae) -> {
+			group.setScaleX(group.getScaleX() * 1.5);
+			group.setScaleY(group.getScaleY() * 1.5);
 		});
 		MenuItem zoomOutMenuItem = new MenuItem("Zoom _Out");
 		zoomOutMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.O));
 		zoomOutMenuItem.setGraphic(new ImageView(new Image(ZOOM_OUT_ICON)));
-		zoomOutMenuItem.setOnAction(new EventHandler<ActionEvent>() {
-			@Override
-			public void handle(ActionEvent event) {
-				group.setScaleX(group.getScaleX() * 1 / 1.5);
-				group.setScaleY(group.getScaleY() * 1 / 1.5);
-			}
+		zoomOutMenuItem.setOnAction((ae) -> {
+			group.setScaleX(group.getScaleX() * 1 / 1.5);
+			group.setScaleY(group.getScaleY() * 1 / 1.5);
 		});
 		zoomMenu.getItems().setAll(zoomResetMenuItem, zoomInMenuItem, zoomOutMenuItem);
 		MenuBar menuBar = new MenuBar();
@@ -186,36 +177,25 @@ public class RBTreePane extends BorderPane {
 			labelStatus.setText("Save to file clicked.");
 			// TODO Add method Save to file.
 		});
-		// Separate buttons Files and Steps
-		Separator separatorFilesSteps = new Separator(Orientation.VERTICAL);
-		// Start visualization of tree.
+		// Separate File buttons and other items.
+		Separator separatorFile = new Separator(Orientation.VERTICAL);
+		// Visualization of tree.
+		// If selected true - on visual, false - off visual
 		btnVisualize = new ToggleButton("Visualize");
 		btnVisualize.setSelected(true);
-		// Start visualization of tree.
-		btnStepPrev = new Button("<<");
-		btnStepPrev.setOnAction((ae) -> {
+		// Separate Visual buttons and other items.
+		Separator separatorVisual = new Separator(Orientation.VERTICAL);
+		// TODO Delete it. Test lock button
+		btnLockToolBar = new Button("Lock");
+		btnLockToolBar.setOnAction((ae) -> {
 			resetTree();
-			labelStatus.setText("Previous step clicked.");
-			// TODO Add method Previous step.
+			labelStatus.setText("Lock clicked.");
+			// setDisableButtons(vbLeft);
+			chooseButtonSet("ControlButtons");
 		});
-		// Start visualization of tree.
-		btnStepNext = new Button(">>");
-		btnStepNext.setOnAction((ae) -> {
-			resetTree();
-			labelStatus.setText("Next step clicked.");
-			// TODO Add method Next step.
-		});
-		// Separate buttons Files and Steps
-		Separator separatorStepsReset = new Separator(Orientation.VERTICAL);
-		// Start visualization of tree.
-		btnReset = new Button("Reset");
-		btnReset.setOnAction((ae) -> {
-			resetTree();
-			labelStatus.setText("Reset clicked.");
-			// TODO Add method Next step.
-		});
-		ToolBar toolBar = new ToolBar(btnOpenFile, btnSaveToFile, separatorFilesSteps, btnVisualize, btnStepPrev,
-				btnStepNext, separatorStepsReset, btnReset);
+
+		ToolBar toolBar = new ToolBar(btnOpenFile, btnSaveToFile, separatorFile, btnVisualize, separatorVisual,
+				btnLockToolBar);
 		toolBar.setPadding(new Insets(3, 20, 5, 10));
 
 		return toolBar;
@@ -294,12 +274,17 @@ public class RBTreePane extends BorderPane {
 		hbLeftValue.setAlignment(Pos.BASELINE_CENTER);
 		hbLeftValue.getChildren().addAll(labelValue, txtFieldValue);
 		// Separate TextFields and control Buttons
-		Separator separatorFieldsButtons = new Separator(Orientation.HORIZONTAL);
+		separatorFieldsButtons = new Separator(Orientation.HORIZONTAL);
 		separatorFieldsButtons.setMinHeight(15);
+
 		// Buttons
 		btnAddElement = new Button("Add element...");
 		btnAddElement.setMaxWidth(Double.MAX_VALUE);
 		btnGetElement = new Button("Get element...");
+		btnGetElement.setMaxWidth(Double.MAX_VALUE);
+		btnStepPrev = new Button("<<");
+		btnAddElement.setMaxWidth(Double.MAX_VALUE);
+		btnStepNext = new Button(">>");
 		btnGetElement.setMaxWidth(Double.MAX_VALUE);
 		// TODO Delete it. Testing button_changeColor
 		testBtnChangeColor = new Button("TESTING");
@@ -307,30 +292,22 @@ public class RBTreePane extends BorderPane {
 		testBtnChangeColor.setOnAction((ae) -> {
 			resetTree();
 			/*
-			 * if (colorIdx == 0) { // graphicGroup.getChildren().clear();
-			 * double radius = getWidth() < getHeight() ? (getWidth() /
-			 * countItemsAtRow) : (getHeight() / countItemsAtRow);
-			 * testVertexGroup = new VertexGroup(mainTree.getRoot(),
-			 * countHeight, getWidth(), radius);
-			 * graphicGroup.getChildren().add(testVertexGroup); colorIdx++; }
-			 * else { if (!txtFieldKey.getText().isEmpty())
-			 * testVertexGroup.setCenterX(Double.valueOf(txtFieldKey.getText()))
-			 * ; }
+			 * if (!txtFieldKey.getText().isEmpty()) {
+			 * mainTree.containsKey(txtFieldKey.getText()); }
 			 */
-			if (!txtFieldKey.getText().isEmpty()) {
-				// System.out.println(keyIndex.get(txtFieldKey.getText()));
-				// VertexGroup vert = (VertexGroup)
-				// graphicGroup.getChildren().get(keyIndex.get(txtFieldKey.getText()));
-				mainTree.containsKey(txtFieldKey.getText());
-			}
+			// setDisableButtons(toolBar);
+			chooseButtonSet("StepButtons");
 		});
 		Button btnContainsKey = new Button("Contains key?");
 		btnContainsKey.setMaxWidth(Double.MAX_VALUE);
 		btnContainsKey.setOnAction((ae) -> {
 			resetTree();
-			if (!txtFieldKey.getText().isEmpty()) {
-				mainTree.containsKey(txtFieldKey.getText());
-			}
+			// TODO Need uncomment.
+			/*
+			 * if (!txtFieldKey.getText().isEmpty()) {
+			 * mainTree.containsKey(txtFieldKey.getText()); }
+			 */
+			setDisableButtons(toolBar);
 		});
 		// Text area
 		txtArea = new TextArea();
@@ -341,10 +318,10 @@ public class RBTreePane extends BorderPane {
 		// Actions
 		btnAddElement.setOnAction((ae) -> {
 			resetTree();
-			labelStatus.setText("Button AddElement was pressed.");
 			if ((txtFieldKey.getText().isEmpty()) || (txtFieldValue.getText().isEmpty())) {
 				labelStatus.setText("Error when try AddElement. Please check Key or Value!");
 			} else {
+				labelStatus.setText("Status bar...");
 				String key = txtFieldKey.getText();
 				mainTree.put(key, txtFieldValue.getText());
 				if (btnVisualize.isSelected())
@@ -353,27 +330,119 @@ public class RBTreePane extends BorderPane {
 		});
 		btnGetElement.setOnAction((ae) -> {
 			resetTree();
-			labelStatus.setText("Button GetElement was pressed.");
+			txtArea.clear();
 			if (txtFieldKey.getText().isEmpty()) {
 				labelStatus.setText("Error when try GetElement. Please check Key!");
 			} else {
-				String value = mainTree.get(txtFieldKey.getText());
-				if (value == null) {
-					labelStatus.setText("Key is not found. Please try again.");
+				labelStatus.setText("Status bar...");
+				String strKey = txtFieldKey.getText();
+				txtArea.appendText("Get element:\nKey = " + strKey);
+				String strValue = mainTree.get(strKey);
+				if (strValue == null) {
+					txtArea.appendText("\nKey is not found.\nPlease try again.");
 				} else {
-					labelStatus.setText(String.valueOf(value));
+					txtArea.appendText("\nValue = " + strValue);
 				}
 			}
 		});
 
 		FlowPane leftPane = new FlowPane(Orientation.VERTICAL);
 		leftPane.setPadding(new Insets(20, 20, 20, 20));
+		leftPane.setHgap(8);
 		leftPane.setVgap(8);
 		leftPane.setAlignment(Pos.BASELINE_CENTER);
 		leftPane.getChildren().addAll(hbLeftKey, hbLeftValue, separatorFieldsButtons, btnAddElement, btnGetElement,
-				testBtnChangeColor, btnContainsKey, txtArea);
+				btnContainsKey, testBtnChangeColor, txtArea);
 		leftPane.setMinHeight(409);
 		return leftPane;
+	}
+
+	/**
+	 * Set specified buttons according to parameter <tt>strButtonSet<tt>
+	 * 
+	 * @param strButtonSet
+	 *            name of button set
+	 */
+	public void chooseButtonSet(String strButtonSet) {
+		vbLeft.getChildren().removeAll(btnAddElement, btnGetElement, btnStepPrev, btnStepNext);
+		int idxOfSeparator = vbLeft.getChildren().indexOf(separatorFieldsButtons);
+		switch (strButtonSet) {
+		case "StepButtons":
+			vbLeft.getChildren().add(++idxOfSeparator, btnStepPrev);
+			vbLeft.getChildren().add(++idxOfSeparator, btnStepNext);
+			break;
+
+		case "ControlButtons":
+			vbLeft.getChildren().add(++idxOfSeparator, btnAddElement);
+			vbLeft.getChildren().add(++idxOfSeparator, btnGetElement);
+			break;
+
+		default:
+			break;
+		}
+	};
+
+	/**
+	 * Disable and enable buttons from parent and HBox/VBox children of this
+	 * parent.
+	 * 
+	 * @param parent
+	 *            parent with Button/HBox/VBox children
+	 */
+	public void setDisableButtons(Parent parent) {
+		for (int i = 0; i < parent.getChildrenUnmodifiable().size(); ++i) {
+			Node nodeClass = parent.getChildrenUnmodifiable().get(i);
+			switch (nodeClass.getClass().getName()) {
+			case "javafx.scene.layout.HBox":
+				HBox hbClass = (HBox) nodeClass;
+				for (int j = 0; j < hbClass.getChildren().size(); ++j) {
+					Node nodeClassAtHBox = hbClass.getChildren().get(j);
+					switch (nodeClassAtHBox.getClass().getName()) {
+					case "javafx.scene.control.Button":
+						Button btnAtHBox = (Button) nodeClassAtHBox;
+						if (btnAtHBox.isDisabled())
+							btnAtHBox.setDisable(false);
+						else
+							btnAtHBox.setDisable(true);
+						break;
+
+					default:
+						break;
+					}
+				}
+				break;
+
+			case "javafx.scene.layout.VBox":
+				VBox vbClass = (VBox) nodeClass;
+				for (int j = 0; j < vbClass.getChildren().size(); ++j) {
+					Node nodeClassAtVBox = vbClass.getChildren().get(j);
+					switch (nodeClassAtVBox.getClass().getName()) {
+					case "javafx.scene.control.Button":
+						Button btnAtVBox = (Button) nodeClassAtVBox;
+						if (btnAtVBox.isDisabled())
+							btnAtVBox.setDisable(false);
+						else
+							btnAtVBox.setDisable(true);
+						break;
+
+					default:
+						break;
+					}
+				}
+				break;
+
+			case "javafx.scene.control.Button":
+				Button btnAtNodeClass = (Button) nodeClass;
+				if (btnAtNodeClass.isDisabled())
+					btnAtNodeClass.setDisable(false);
+				else
+					btnAtNodeClass.setDisable(true);
+				break;
+
+			default:
+				break;
+			}
+		}
 	}
 
 	// Graphic methods
@@ -398,7 +467,7 @@ public class RBTreePane extends BorderPane {
 	private int countHeight = 1;
 	private int countItemsAtRow = 10 * 4;
 
-	private void preOrder(INode<String, String> iNode, double center, double width, double radius) {
+	private void preOrder(INode<String, String> iNode, final double center, double width, double radius) {
 		System.out.println(center);
 		VertexGroup vert = new VertexGroup(iNode, countHeight, center, radius);
 		graphicGroup.getChildren().add(vert);
@@ -440,10 +509,9 @@ public class RBTreePane extends BorderPane {
 			vert.reset();
 		}
 	}
-	
-	public static final String APP_ICON = "http://icons.iconarchive.com/icons/deleket/soft-scraps/128/Zoom-icon.png";
-	public static final String ZOOM_RESET_ICON = "http://icons.iconarchive.com/icons/deleket/soft-scraps/24/Zoom-icon.png";
-	public static final String ZOOM_OUT_ICON = "http://icons.iconarchive.com/icons/deleket/soft-scraps/24/Zoom-Out-icon.png";
-	public static final String ZOOM_IN_ICON = "http://icons.iconarchive.com/icons/deleket/soft-scraps/24/Zoom-In-icon.png";
-	public static final String CLOSE_ICON = "http://icons.iconarchive.com/icons/deleket/soft-scraps/24/Button-Close-icon.png";
+
+	public static final String ZOOM_RESET_ICON = "/images/Zoom-icon.png";
+	public static final String ZOOM_OUT_ICON = "/images/Zoom-Out-icon.png";
+	public static final String ZOOM_IN_ICON = "/images/Zoom-In-icon.png";
+	public static final String CLOSE_ICON = "/images/Actions-application-exit-icon.png";
 }
