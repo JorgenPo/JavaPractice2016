@@ -26,56 +26,56 @@ public class RBTree<K, V> implements ITree<K, V> {
 	}
 
 	static class Node<K, V> implements ITree.INode<K, V> {
-		private K mKey;
-		private V mValue;
+		private K key;
+		private V value;
 
-		private Node<K, V> mParent;
-		private Node<K, V> mLeftChild;
-		private Node<K, V> mRightChild;
+		private Node<K, V> parent;
+		private Node<K, V> leftChild;
+		private Node<K, V> rightChild;
 
-		private boolean mIsRed = false;
+		private boolean isRed = false;
 
 		public Node(K key, V value, Node<K, V> parent) {
-			mKey = key;
-			mValue = value;
-			mParent = parent;
+			this.key = key;
+			this.value = value;
+			this.parent = parent;
 		}
 
 		@Override
 		public V getValue() {
-			return mValue;
+			return value;
 		}
 
 		@Override
 		public K getKey() {
-			return mKey;
+			return key;
 		}
 
 		@Override
 		public V setValue(V newVal) {
-			V old = mValue;
-			mValue = newVal;
+			V old = value;
+			value = newVal;
 			return old;
 		}
 
 		@Override
 		public INode<K, V> parent() {
-			return mParent;
+			return parent;
 		}
 
 		@Override
 		public INode<K, V> leftChild() {
-			return mLeftChild;
+			return leftChild;
 		}
 
 		@Override
 		public INode<K, V> rightChild() {
-			return mRightChild;
+			return rightChild;
 		}
 
 		@Override
 		public boolean isRed() {
-			return mIsRed;
+			return isRed;
 		}
 
 		public boolean equals(Object o) {
@@ -84,17 +84,17 @@ public class RBTree<K, V> implements ITree<K, V> {
 			}
 			ITree.INode<?, ?> e = (ITree.INode<?, ?>) o;
 
-			return valEquals(mKey, e.getKey()) && valEquals(mValue, e.getValue());
+			return valEquals(key, e.getKey()) && valEquals(value, e.getValue());
 		}
 
 		public int hashCode() {
-			int keyHash = (mKey == null ? 0 : mKey.hashCode());
-			int valHash = (mValue == null ? 0 : mValue.hashCode());
+			int keyHash = (key == null ? 0 : key.hashCode());
+			int valHash = (value == null ? 0 : value.hashCode());
 			return keyHash ^ valHash;
 		}
 
 		public String toString() {
-			return mKey + " = " + mValue;
+			return key + " = " + value;
 		}
 	}
 
@@ -122,11 +122,11 @@ public class RBTree<K, V> implements ITree<K, V> {
 		if (comp != null) {
 			do {
 				parent = r;
-				cmp = comp.compare(key, r.mKey);
+				cmp = comp.compare(key, r.key);
 				if (cmp < 0) {
-					r = r.mLeftChild;
+					r = r.leftChild;
 				} else if (cmp > 0) {
-					r = r.mRightChild;
+					r = r.rightChild;
 				} else {
 					return r.setValue(value);
 				}
@@ -139,11 +139,11 @@ public class RBTree<K, V> implements ITree<K, V> {
 
 			do {
 				parent = r;
-				cmp = k.compareTo(r.mKey);
+				cmp = k.compareTo(r.key);
 				if (cmp < 0) {
-					r = r.mLeftChild;
+					r = r.leftChild;
 				} else if (cmp > 0) {
-					r = r.mRightChild;
+					r = r.rightChild;
 				} else {
 					return r.setValue(value);
 				}
@@ -153,9 +153,9 @@ public class RBTree<K, V> implements ITree<K, V> {
 		// Now r - leaf node. Now we can create new node and insert it
 		Node<K, V> n = new Node<>(key, value, parent);
 		if (cmp < 0) {
-			parent.mLeftChild = n;
+			parent.leftChild = n;
 		} else {
-			parent.mRightChild = n;
+			parent.rightChild = n;
 		}
 
 		balanceAfterInsertion(n);
@@ -205,11 +205,11 @@ public class RBTree<K, V> implements ITree<K, V> {
 		if (comp != null) {
 			Node<K, V> node = root;
 			while (node != null) {
-				int cmp = comp.compare(node.mKey, key);
+				int cmp = comp.compare(node.key, key);
 				if (cmp < 0) {
-					node = node.mLeftChild;
+					node = node.leftChild;
 				} else if (cmp > 0) {
-					node = node.mRightChild;
+					node = node.rightChild;
 				} else {
 					return node;
 				}
@@ -244,11 +244,11 @@ public class RBTree<K, V> implements ITree<K, V> {
 				treePane.setSelectedByKey(currentKey);
 			}
 
-			int cmp = key.compareTo(node.mKey);
+			int cmp = key.compareTo(node.key);
 			if (cmp < 0) {
-				node = node.mLeftChild;
+				node = node.leftChild;
 			} else if (cmp > 0) {
-				node = node.mRightChild;
+				node = node.rightChild;
 			} else {
 				return node;
 			}
@@ -259,7 +259,7 @@ public class RBTree<K, V> implements ITree<K, V> {
 	@Override
 	public V get(K key) {
 		Node<K, V> e = getNode(key);
-		return e == null ? null : e.mValue;
+		return e == null ? null : e.value;
 	}
 
 	@Override
@@ -269,7 +269,7 @@ public class RBTree<K, V> implements ITree<K, V> {
 			return null;
 		}
 
-		V old = e.mValue;
+		V old = e.value;
 		e.setValue(newVal);
 		return old;
 	}
@@ -295,70 +295,70 @@ public class RBTree<K, V> implements ITree<K, V> {
 	// Balancing methods
 
 	private static <K, V> boolean isRed(Node<K, V> p) {
-		return p == null ? false : p.mIsRed;
+		return p == null ? false : p.isRed;
 	}
 
 	private static <K, V> Node<K, V> parentOf(Node<K, V> p) {
-		return p == null ? null : p.mParent;
+		return p == null ? null : p.parent;
 	}
 
 	private static <K, V> void setRed(Node<K, V> p, boolean b) {
 		if (p != null) {
-			p.mIsRed = b;
+			p.isRed = b;
 		}
 	}
 
 	private static <K, V> Node<K, V> leftOf(Node<K, V> p) {
-		return p == null ? null : p.mLeftChild;
+		return p == null ? null : p.leftChild;
 	}
 
 	private static <K, V> Node<K, V> rightOf(Node<K, V> p) {
-		return p == null ? null : p.mRightChild;
+		return p == null ? null : p.rightChild;
 	}
 
 	private void rotateLeft(Node<K, V> x) {
 		if (x != null) {
-			Node<K, V> q = x.mRightChild;
+			Node<K, V> q = x.rightChild;
 
-			x.mRightChild = q.mLeftChild;
-			if (q.mLeftChild != null) {
-				q.mLeftChild.mParent = x;
+			x.rightChild = q.leftChild;
+			if (q.leftChild != null) {
+				q.leftChild.parent = x;
 			}
 
-			q.mParent = x.mParent;
-			if (x.mParent == null) { // If x - root element
+			q.parent = x.parent;
+			if (x.parent == null) { // If x - root element
 				root = q;
-			} else if (x.mParent.mLeftChild == x) { // If x - left child
-				x.mParent.mLeftChild = q;
+			} else if (x.parent.leftChild == x) { // If x - left child
+				x.parent.leftChild = q;
 			} else {
-				x.mParent.mRightChild = q;
+				x.parent.rightChild = q;
 			}
 
-			q.mLeftChild = x;
-			x.mParent = q;
+			q.leftChild = x;
+			x.parent = q;
 		}
 	}
 
 	private void rotateRight(Node<K, V> x) {
 		if (x != null) {
-			Node<K, V> q = x.mLeftChild;
+			Node<K, V> q = x.leftChild;
 
-			x.mLeftChild = q.mRightChild;
-			if (q.mRightChild != null) {
-				q.mRightChild.mParent = x;
+			x.leftChild = q.rightChild;
+			if (q.rightChild != null) {
+				q.rightChild.parent = x;
 			}
 
-			q.mParent = x.mParent;
-			if (x.mParent == null) { // If x - root element
+			q.parent = x.parent;
+			if (x.parent == null) { // If x - root element
 				root = q;
-			} else if (x.mParent.mLeftChild == x) { // If x - left child
-				x.mParent.mLeftChild = q;
+			} else if (x.parent.leftChild == x) { // If x - left child
+				x.parent.leftChild = q;
 			} else {
-				x.mParent.mRightChild = q;
+				x.parent.rightChild = q;
 			}
 
-			q.mRightChild = x;
-			x.mParent = q;
+			q.rightChild = x;
+			x.parent = q;
 		}
 	}
 
@@ -369,9 +369,9 @@ public class RBTree<K, V> implements ITree<K, V> {
 	 *            root of the tree to balance.
 	 */
 	private void balanceAfterInsertion(Node<K, V> x) {
-		x.mIsRed = true;
+		x.isRed = true;
 
-		while (x != null && x != root && x.mParent.mIsRed) {
+		while (x != null && x != root && x.parent.isRed) {
 			if (parentOf(x) == leftOf(parentOf(parentOf(x)))) {
 				Node<K, V> u = rightOf(parentOf(parentOf(x))); // Uncle
 				if (isRed(u)) {
@@ -410,6 +410,6 @@ public class RBTree<K, V> implements ITree<K, V> {
 				}
 			}
 		}
-		root.mIsRed = false;
+		root.isRed = false;
 	}
 }
