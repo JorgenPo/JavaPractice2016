@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import rbtree.RBTree;
+import rbtree.Utills;
 
 /**
  * GUI of application.
@@ -26,6 +27,15 @@ public class RBTree_GUI_Main extends Application {
 		tree.put("Hello", "Tree");
 		System.out.println("Size of tree after insertation: " + tree.getSize());
 
+		// Test of saving tree
+		try {
+			Utills.saveTreeToFile(tree, "tree.graph");
+			RBTree<String, String> loaded = Utills.loadTreeFromFile("tree.graph");
+			System.out.println("Size of loaded tree: " + loaded.getSize());
+		} catch (Exception e) {
+			System.err.println("Error: can't save the graph!");
+		}
+		
 		launch(args);
 	}
 

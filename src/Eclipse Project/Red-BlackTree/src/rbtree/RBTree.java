@@ -1,7 +1,10 @@
 package rbtree;
 
 import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Stack;
+import java.util.function.Consumer;
 
 import javafx.application.Platform;
 import rbtee_gui.RBTreePane;
@@ -411,5 +414,32 @@ public class RBTree<K, V> implements ITree<K, V> {
 			}
 		}
 		mRoot.mIsRed = false;
+	}
+	
+
+	/**
+	 * Perform action to every node in tree.
+	 * Based on BFS.
+	 * 
+	 * @param action
+	 * 		Action (function) to perform
+	 */
+	public void perform(Consumer<Node<K,V>> action) {
+		Queue<Node<K,V>> q = new LinkedList<Node<K,V>>();
+		q.add(mRoot);
+		
+		Node<K,V> n = null;
+		while (!q.isEmpty()) {
+			n = q.remove();
+			action.accept(n);
+			
+			if (n.mLeftChild != null) {
+				q.add(n.mLeftChild);
+			}
+			
+			if (n.mRightChild != null) {
+				q.add(n.mRightChild);
+			}
+		}
 	}
 }
