@@ -16,10 +16,14 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -27,8 +31,11 @@ import javafx.scene.Parent;
 
 import java.util.HashMap;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import rbtree.*;
 import rbtree.ITree.INode;
@@ -71,6 +78,7 @@ public class RBTreePane extends BorderPane {
 	 */
 	public void start(final Stage primaryStage) throws Exception {
 		System.out.println("Method (start).");
+		primaryStage.getIcons().add(new Image(APP_ICON));
 
 		mainTree = new RBTree<>();
 		mainTree.setRBTreePane(this);
@@ -241,11 +249,46 @@ public class RBTreePane extends BorderPane {
 		 * graphicGroup.getChildren().add(text2);
 		 */
 
+		Parent zoomGraphicPane = createZoomPane(graphicGroup);
+
 		VBox centerPane = new VBox(10);
 		centerPane.setPadding(new Insets(5, 20, 10, 5));
-		centerPane.getChildren().addAll(labelGraph, graphicGroup);
+		VBox.setVgrow(zoomGraphicPane, Priority.ALWAYS);
+		centerPane.getChildren().setAll(labelGraph, zoomGraphicPane);
 
 		return centerPane;
+	}
+
+	private Parent createZoomPane(Group group) {
+		final double SCALE_DELTA = 1.1;
+		final StackPane zoomPane = new StackPane();
+
+		zoomPane.getChildren().add(group);
+		zoomPane.setOnScroll(new EventHandler<ScrollEvent>() {
+			@Override
+			public void handle(ScrollEvent event) {
+				event.consume();
+
+				if (event.getDeltaY() == 0)
+					return;
+
+				double scaleFactor = (event.getDeltaY() > 0) ? SCALE_DELTA : 1 / SCALE_DELTA;
+
+				group.setScaleX(group.getScaleX() * scaleFactor);
+				group.setScaleY(group.getScaleY() * scaleFactor);
+			}
+		});
+
+		zoomPane.layoutBoundsProperty().addListener(new ChangeListener<Bounds>() {
+			@Override
+			public void changed(ObservableValue<? extends Bounds> observable, Bounds oldBounds, Bounds bounds) {
+				// TODO Auto-generated method stub
+				zoomPane.setClip(
+						new Rectangle(bounds.getMinX(), bounds.getMinY(), bounds.getWidth(), bounds.getHeight()));
+			}
+		});
+
+		return zoomPane;
 	}
 
 	/**
@@ -510,8 +553,9 @@ public class RBTreePane extends BorderPane {
 		}
 	}
 
-	public static final String ZOOM_RESET_ICON = "/images/Zoom-icon.png";
-	public static final String ZOOM_OUT_ICON = "/images/Zoom-Out-icon.png";
-	public static final String ZOOM_IN_ICON = "/images/Zoom-In-icon.png";
-	public static final String CLOSE_ICON = "/images/Actions-application-exit-icon.png";
+	private static final String APP_ICON = "/images/App-tree-black-2-icon.png";
+	private static final String ZOOM_RESET_ICON = "/images/Zoom-icon.png";
+	private static final String ZOOM_OUT_ICON = "/images/Zoom-Out-icon.png";
+	private static final String ZOOM_IN_ICON = "/images/Zoom-In-icon.png";
+	private static final String CLOSE_ICON = "/images/Actions-application-exit-icon.png";
 }
