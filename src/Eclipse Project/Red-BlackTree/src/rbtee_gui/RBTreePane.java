@@ -282,7 +282,6 @@ public class RBTreePane extends BorderPane {
 		zoomPane.layoutBoundsProperty().addListener(new ChangeListener<Bounds>() {
 			@Override
 			public void changed(ObservableValue<? extends Bounds> observable, Bounds oldBounds, Bounds bounds) {
-				// TODO Auto-generated method stub
 				zoomPane.setClip(
 						new Rectangle(bounds.getMinX(), bounds.getMinY(), bounds.getWidth(), bounds.getHeight()));
 			}
