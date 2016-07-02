@@ -226,10 +226,11 @@ public class RBTree<K, V> implements ITree<K, V> {
 	 *            Key to search.
 	 * @return Node with key k or null if there are no node with such key.
 	 */
-	final Node<K, V> getNode(Object k) {
+	final TreeExecution<Node<K, V>, K, V> getNode(Object k) {
 		if (comparator != null) {
 			getNodeWithComparator(k);
 		}
+
 		if (k == null) {
 			throw new NullPointerException();
 		}
@@ -237,34 +238,56 @@ public class RBTree<K, V> implements ITree<K, V> {
 		@SuppressWarnings("unchecked")
 		Comparable<? super K> key = (Comparable<? super K>) k;
 
-		Node<K, V> node = root;
-		while (node != null) {
-			if (treePane != null) {
-				final String currentKey = node.getKey().toString();
-				treePane.setSelectedByKey(currentKey);
+		return new TreeExecution<Node<K, V>, K, V>() {	
+			private Node<K, V> node;
+			{
+				node = root;
+			}
+			
+			@Override
+			public void step() {
+				if (!works())
+					return;
+				
+				int cmp = key.compareTo(node.key);
+				
+				if (cmp < 0) {
+					node = node.leftChild;
+				} else {
+					node = node.rightChild;
+				}				
 			}
 
-			int cmp = key.compareTo(node.key);
-			if (cmp < 0) {
-				node = node.leftChild;
-			} else if (cmp > 0) {
-				node = node.rightChild;
-			} else {
+			@Override
+			public boolean works() {
+				return node != null && key.compareTo(node.key) != 0;
+			}
+
+			@Override
+			public Node<K, V> getResult() {
+				while (works()) {
+					step();
+				}
+				
 				return node;
 			}
-		}
-		return null;
+
+			@Override
+			public rbtree.ITree.INode<K, V> getNode() {
+				return node;
+			}
+		};
 	}
 
 	@Override
 	public V get(K key) {
-		Node<K, V> e = getNode(key);
+		Node<K, V> e = getNode(key).getResult();
 		return e == null ? null : e.value;
 	}
 
 	@Override
 	public V set(K key, V newVal) {
-		Node<K, V> e = getNode(key);
+		Node<K, V> e = getNode(key).getResult();
 		if (e == null) {
 			return null;
 		}
