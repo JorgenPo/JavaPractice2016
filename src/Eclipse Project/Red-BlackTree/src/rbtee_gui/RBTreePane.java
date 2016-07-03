@@ -24,11 +24,14 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 
+import java.io.File;
 import java.util.HashMap;
 
 import javafx.beans.value.ChangeListener;
@@ -60,7 +63,7 @@ public class RBTreePane extends BorderPane {
 	private ToggleButton btnVisualize;
 	private TextField txtFieldKey, txtFieldValue;
 	private TextArea txtArea;
-
+	
 	// For graphics
 	private Group graphicGroup;
 
@@ -85,7 +88,7 @@ public class RBTreePane extends BorderPane {
 		graphicGroup = new Group();
 		keyIndex = new HashMap<>();
 
-		toolBar = makeToolBar();
+		toolBar = makeToolBar(primaryStage);
 		hbStatusBar = makeStatusBar();
 		vbCenter = makeNodeCenter();
 		// Separate LeftPane and CenterPane
@@ -93,10 +96,53 @@ public class RBTreePane extends BorderPane {
 		vbLeft = makeNodeLeft();
 		hbLeft = new HBox();
 		hbLeft.getChildren().addAll(vbLeft, separatorLeftCenter);
-
 		setLayouts(primaryStage);
 	}
 
+	/**
+	 * Opens file save dialog in your system and save the tree in
+	 * selected file
+	 * 
+	 * @param tree
+	 * 		Tree to save
+	 * @param mainStage
+	 * 		Main stage (window)
+	 */
+	private <K,V> void saveTree(RBTree<K,V> tree, final Stage mainStage) {
+		FileChooser fc = new FileChooser();
+		fc.setTitle("Сохранение дерева");
+		
+		fc.getExtensionFilters().addAll( 
+				new ExtensionFilter("Graph files", "*.graph"),
+				new ExtensionFilter("Text files", "*.txt"));
+		fc.setInitialDirectory(new File(System.getProperty("user.dir")));
+		
+		File file = fc.showSaveDialog(mainStage);
+		if (file != null) {
+			labelStatus.setText("Tree saved to " + file);
+		} else {
+			labelStatus.setText("Tree has not been saved! (canceled)");
+		}
+	}
+	
+	private void loadTree(final Stage mainStage) {
+		FileChooser fc = new FileChooser();
+		fc.setTitle("Загрузка дерева");
+		
+		fc.getExtensionFilters().addAll( 
+				new ExtensionFilter("Graph files", "*.graph"),
+				new ExtensionFilter("Text files", "*.txt"));
+		fc.setInitialDirectory(new File(System.getProperty("user.dir")));
+		
+		File file = fc.showOpenDialog(mainStage);
+		if (file != null) {
+			this.mainTree = Utills.loadTreeFromFile(file.getName());
+			labelStatus.setText("Tree loaded from " + file);
+			paintRBTree();
+		} else {
+			labelStatus.setText("Tree has not been loaded!");
+		}
+	}
 	/**
 	 * Locates panes in the right place.
 	 */
@@ -170,20 +216,22 @@ public class RBTreePane extends BorderPane {
 	 * 
 	 * @return tool bar of application
 	 */
-	private ToolBar makeToolBar() {
+	private ToolBar makeToolBar(final Stage mainStage) {
 		// Open file with data for tree painting.
 		btnOpenFile = new Button("Open...");
 		btnOpenFile.setOnAction((ae) -> {
 			resetTree();
 			labelStatus.setText("Open file clicked.");
-			// TODO Add method Open file.
+			loadTree(mainStage);
 		});
 		// Save data of current tree to the file.
 		btnSaveToFile = new Button("Save...");
 		btnSaveToFile.setOnAction((ae) -> {
 			resetTree();
 			labelStatus.setText("Save to file clicked.");
-			// TODO Add method Save to file.
+			if (this.mainTree.getSize() != 0) { 
+				saveTree(this.mainTree, mainStage);
+			}
 		});
 		// Separate File buttons and other items.
 		Separator separatorFile = new Separator(Orientation.VERTICAL);
