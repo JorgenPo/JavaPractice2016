@@ -11,13 +11,13 @@ import rbtee_gui.RBTreePane;
 
 public class RBTree<K, V> implements ITree<K, V> {
 
-	private Node<K, V> mRoot = null;
-	private int mSize = 0;
-	private final Comparator<? super K> mComparator;
+	private Node<K, V> root = null;
+	private int size = 0;
+	private final Comparator<? super K> comparator;
 	private RBTreePane treePane;
 
 	public RBTree() {
-		mComparator = null;
+		comparator = null;
 	}
 
 	public void setRBTreePane(RBTreePane treePane) {
@@ -25,60 +25,60 @@ public class RBTree<K, V> implements ITree<K, V> {
 	}
 
 	public RBTree(Comparator<? super K> comparator) {
-		mComparator = comparator;
+		this.comparator = comparator;
 	}
 
 	static class Node<K, V> implements ITree.INode<K, V> {
-		K mKey;
-		V mValue;
+		private K key;
+		private V value;
 
-		Node<K, V> mParent;
-		Node<K, V> mLeftChild;
-		Node<K, V> mRightChild;
+		private Node<K, V> parent;
+		private Node<K, V> leftChild;
+		private Node<K, V> rightChild;
 
-		boolean mIsRed = false;
+		private boolean isRed = false;
 
 		public Node(K key, V value, Node<K, V> parent) {
-			mKey = key;
-			mValue = value;
-			mParent = parent;
+			this.key = key;
+			this.value = value;
+			this.parent = parent;
 		}
 
 		@Override
 		public V getValue() {
-			return mValue;
+			return value;
 		}
 
 		@Override
 		public K getKey() {
-			return mKey;
+			return key;
 		}
 
 		@Override
 		public V setValue(V newVal) {
-			V old = mValue;
-			mValue = newVal;
+			V old = value;
+			value = newVal;
 			return old;
 		}
 
 		@Override
 		public INode<K, V> parent() {
-			return mParent;
+			return parent;
 		}
 
 		@Override
 		public INode<K, V> leftChild() {
-			return mLeftChild;
+			return leftChild;
 		}
 
 		@Override
 		public INode<K, V> rightChild() {
-			return mRightChild;
+			return rightChild;
 		}
 
 		@Override
 		public boolean isRed() {
-			return mIsRed;
+			return isRed;
 		}
 
 		public boolean equals(Object o) {
@@ -87,49 +87,49 @@ public class RBTree<K, V> implements ITree<K, V> {
 			}
 			ITree.INode<?, ?> e = (ITree.INode<?, ?>) o;
 
-			return valEquals(mKey, e.getKey()) && valEquals(mValue, e.getValue());
+			return valEquals(key, e.getKey()) && valEquals(value, e.getValue());
 		}
 
 		public int hashCode() {
-			int keyHash = (mKey == null ? 0 : mKey.hashCode());
-			int valHash = (mValue == null ? 0 : mValue.hashCode());
+			int keyHash = (key == null ? 0 : key.hashCode());
+			int valHash = (value == null ? 0 : value.hashCode());
 			return keyHash ^ valHash;
 		}
 
 		public String toString() {
-			return mKey + " = " + mValue;
+			return key + " = " + value;
 		}
 	}
 
 	@Override
 	public INode<K, V> getRoot() {
-		return mRoot;
+		return root;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public V put(K key, V value) {
-		Node<K, V> r = mRoot;
+		Node<K, V> r = root;
 
 		if (r == null) { // First case - insert to empty tree
 			compare(key, key);
-			mRoot = new Node<>(key, value, null);
-			mSize = 1;
+			root = new Node<>(key, value, null);
+			size = 1;
 			return null;
 		}
 
 		int cmp; // Compare result
 		Node<K, V> parent;
 
-		Comparator<? super K> comp = mComparator;
+		Comparator<? super K> comp = comparator;
 		if (comp != null) {
 			do {
 				parent = r;
-				cmp = comp.compare(key, r.mKey);
+				cmp = comp.compare(key, r.key);
 				if (cmp < 0) {
-					r = r.mLeftChild;
+					r = r.leftChild;
 				} else if (cmp > 0) {
-					r = r.mRightChild;
+					r = r.rightChild;
 				} else {
 					return r.setValue(value);
 				}
@@ -142,11 +142,11 @@ public class RBTree<K, V> implements ITree<K, V> {
 
 			do {
 				parent = r;
-				cmp = k.compareTo(r.mKey);
+				cmp = k.compareTo(r.key);
 				if (cmp < 0) {
-					r = r.mLeftChild;
+					r = r.leftChild;
 				} else if (cmp > 0) {
-					r = r.mRightChild;
+					r = r.rightChild;
 				} else {
 					return r.setValue(value);
 				}
@@ -156,13 +156,13 @@ public class RBTree<K, V> implements ITree<K, V> {
 		// Now r - leaf node. Now we can create new node and insert it
 		Node<K, V> n = new Node<>(key, value, parent);
 		if (cmp < 0) {
-			parent.mLeftChild = n;
+			parent.leftChild = n;
 		} else {
-			parent.mRightChild = n;
+			parent.rightChild = n;
 		}
 
 		balanceAfterInsertion(n);
-		++mSize;
+		++size;
 		return null;
 	}
 
@@ -197,22 +197,22 @@ public class RBTree<K, V> implements ITree<K, V> {
 
 	@Override
 	public int getSize() {
-		return mSize;
+		return size;
 	}
 
 	final Node<K, V> getNodeWithComparator(Object k) {
 		@SuppressWarnings("unchecked")
 		K key = (K) k;
 
-		Comparator<? super K> comp = mComparator;
+		Comparator<? super K> comp = comparator;
 		if (comp != null) {
-			Node<K, V> node = mRoot;
+			Node<K, V> node = root;
 			while (node != null) {
-				int cmp = comp.compare(node.mKey, key);
+				int cmp = comp.compare(node.key, key);
 				if (cmp < 0) {
-					node = node.mLeftChild;
+					node = node.leftChild;
 				} else if (cmp > 0) {
-					node = node.mRightChild;
+					node = node.rightChild;
 				} else {
 					return node;
 				}
@@ -229,10 +229,11 @@ public class RBTree<K, V> implements ITree<K, V> {
 	 *            Key to search.
 	 * @return Node with key k or null if there are no node with such key.
 	 */
-	final Node<K, V> getNode(Object k) {
-		if (mComparator != null) {
+	final TreeExecution<Node<K, V>, K, V> getNode(Object k) {
+		if (comparator != null) {
 			getNodeWithComparator(k);
 		}
+
 		if (k == null) {
 			throw new NullPointerException();
 		}
@@ -240,39 +241,61 @@ public class RBTree<K, V> implements ITree<K, V> {
 		@SuppressWarnings("unchecked")
 		Comparable<? super K> key = (Comparable<? super K>) k;
 
-		Node<K, V> node = mRoot;
-		while (node != null) {
-			if (treePane != null) {
-				final String currentKey = node.getKey().toString();
-				treePane.setSelectedByKey(currentKey);
+		return new TreeExecution<Node<K, V>, K, V>() {	
+			private Node<K, V> node;
+			{
+				node = root;
+			}
+			
+			@Override
+			public void step() {
+				if (!works())
+					return;
+				
+				int cmp = key.compareTo(node.key);
+				
+				if (cmp < 0) {
+					node = node.leftChild;
+				} else {
+					node = node.rightChild;
+				}				
 			}
 
-			int cmp = key.compareTo(node.mKey);
-			if (cmp < 0) {
-				node = node.mLeftChild;
-			} else if (cmp > 0) {
-				node = node.mRightChild;
-			} else {
+			@Override
+			public boolean works() {
+				return node != null && key.compareTo(node.key) != 0;
+			}
+
+			@Override
+			public Node<K, V> getResult() {
+				while (works()) {
+					step();
+				}
+				
 				return node;
 			}
-		}
-		return null;
+
+			@Override
+			public rbtree.ITree.INode<K, V> getNode() {
+				return node;
+			}
+		};
 	}
 
 	@Override
 	public V get(K key) {
-		Node<K, V> e = getNode(key);
-		return e == null ? null : e.mValue;
+		Node<K, V> e = getNode(key).getResult();
+		return e == null ? null : e.value;
 	}
 
 	@Override
 	public V set(K key, V newVal) {
-		Node<K, V> e = getNode(key);
+		Node<K, V> e = getNode(key).getResult();
 		if (e == null) {
 			return null;
 		}
 
-		V old = e.mValue;
+		V old = e.value;
 		e.setValue(newVal);
 		return old;
 	}
@@ -284,10 +307,10 @@ public class RBTree<K, V> implements ITree<K, V> {
 	 */
 	@SuppressWarnings({ "unchecked" })
 	final int compare(Object key1, Object key2) {
-		if (mComparator == null) {
+		if (comparator == null) {
 			return ((Comparable<? super K>) key1).compareTo((K) key2);
 		} else {
-			return mComparator.compare((K) key1, (K) key2);
+			return comparator.compare((K) key1, (K) key2);
 		}
 	}
 
@@ -298,70 +321,70 @@ public class RBTree<K, V> implements ITree<K, V> {
 	// Balancing methods
 
 	private static <K, V> boolean isRed(Node<K, V> p) {
-		return p == null ? false : p.mIsRed;
+		return p == null ? false : p.isRed;
 	}
 
 	private static <K, V> Node<K, V> parentOf(Node<K, V> p) {
-		return p == null ? null : p.mParent;
+		return p == null ? null : p.parent;
 	}
 
 	private static <K, V> void setRed(Node<K, V> p, boolean b) {
 		if (p != null) {
-			p.mIsRed = b;
+			p.isRed = b;
 		}
 	}
 
 	private static <K, V> Node<K, V> leftOf(Node<K, V> p) {
-		return p == null ? null : p.mLeftChild;
+		return p == null ? null : p.leftChild;
 	}
 
 	private static <K, V> Node<K, V> rightOf(Node<K, V> p) {
-		return p == null ? null : p.mRightChild;
+		return p == null ? null : p.rightChild;
 	}
 
 	private void rotateLeft(Node<K, V> x) {
 		if (x != null) {
-			Node<K, V> q = x.mRightChild;
+			Node<K, V> q = x.rightChild;
 
-			x.mRightChild = q.mLeftChild;
-			if (q.mLeftChild != null) {
-				q.mLeftChild.mParent = x;
+			x.rightChild = q.leftChild;
+			if (q.leftChild != null) {
+				q.leftChild.parent = x;
 			}
 
-			q.mParent = x.mParent;
-			if (x.mParent == null) { // If x - root element
-				mRoot = q;
-			} else if (x.mParent.mLeftChild == x) { // If x - left child
-				x.mParent.mLeftChild = q;
+			q.parent = x.parent;
+			if (x.parent == null) { // If x - root element
+				root = q;
+			} else if (x.parent.leftChild == x) { // If x - left child
+				x.parent.leftChild = q;
 			} else {
-				x.mParent.mRightChild = q;
+				x.parent.rightChild = q;
 			}
 
-			q.mLeftChild = x;
-			x.mParent = q;
+			q.leftChild = x;
+			x.parent = q;
 		}
 	}
 
 	private void rotateRight(Node<K, V> x) {
 		if (x != null) {
-			Node<K, V> q = x.mLeftChild;
+			Node<K, V> q = x.leftChild;
 
-			x.mLeftChild = q.mRightChild;
-			if (q.mRightChild != null) {
-				q.mRightChild.mParent = x;
+			x.leftChild = q.rightChild;
+			if (q.rightChild != null) {
+				q.rightChild.parent = x;
 			}
 
-			q.mParent = x.mParent;
-			if (x.mParent == null) { // If x - root element
-				mRoot = q;
-			} else if (x.mParent.mLeftChild == x) { // If x - left child
-				x.mParent.mLeftChild = q;
+			q.parent = x.parent;
+			if (x.parent == null) { // If x - root element
+				root = q;
+			} else if (x.parent.leftChild == x) { // If x - left child
+				x.parent.leftChild = q;
 			} else {
-				x.mParent.mRightChild = q;
+				x.parent.rightChild = q;
 			}
 
-			q.mRightChild = x;
-			x.mParent = q;
+			q.rightChild = x;
+			x.parent = q;
 		}
 	}
 
@@ -372,9 +395,9 @@ public class RBTree<K, V> implements ITree<K, V> {
 	 *            root of the tree to balance.
 	 */
 	private void balanceAfterInsertion(Node<K, V> x) {
-		x.mIsRed = true;
+		x.isRed = true;
 
-		while (x != null && x != mRoot && x.mParent.mIsRed) {
+		while (x != null && x != root && x.parent.isRed) {
 			if (parentOf(x) == leftOf(parentOf(parentOf(x)))) {
 				Node<K, V> u = rightOf(parentOf(parentOf(x))); // Uncle
 				if (isRed(u)) {
@@ -413,10 +436,9 @@ public class RBTree<K, V> implements ITree<K, V> {
 				}
 			}
 		}
-		mRoot.mIsRed = false;
+		root.isRed = false;
 	}
 	
-
 	/**
 	 * Perform action to every node in tree.
 	 * Based on BFS.
@@ -426,20 +448,21 @@ public class RBTree<K, V> implements ITree<K, V> {
 	 */
 	public void perform(Consumer<Node<K,V>> action) {
 		Queue<Node<K,V>> q = new LinkedList<Node<K,V>>();
-		q.add(mRoot);
+		q.add(root);
 		
 		Node<K,V> n = null;
 		while (!q.isEmpty()) {
 			n = q.remove();
 			action.accept(n);
 			
-			if (n.mLeftChild != null) {
-				q.add(n.mLeftChild);
+			if (n.leftChild != null) {
+				q.add(n.leftChild);
 			}
 			
-			if (n.mRightChild != null) {
-				q.add(n.mRightChild);
+			if (n.rightChild != null) {
+				q.add(n.rightChild);
 			}
 		}
+		root.isRed = false;
 	}
 }
