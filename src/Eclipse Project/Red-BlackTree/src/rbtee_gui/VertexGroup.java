@@ -85,7 +85,7 @@ public class VertexGroup extends Group {
 		default:
 			break;
 		}
-		
+
 	}
 
 	public void setCenterX(double centerX) {

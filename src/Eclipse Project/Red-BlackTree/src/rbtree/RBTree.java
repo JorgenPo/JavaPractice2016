@@ -3,10 +3,8 @@ package rbtree;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.Queue;
-import java.util.Stack;
 import java.util.function.Consumer;
 
-import javafx.application.Platform;
 import rbtee_gui.RBTreePane;
 
 public class RBTree<K, V> implements ITree<K, V> {
@@ -229,7 +227,7 @@ public class RBTree<K, V> implements ITree<K, V> {
 	 *            Key to search.
 	 * @return Node with key k or null if there are no node with such key.
 	 */
-	final TreeExecution<Node<K, V>, K, V> getNode(Object k) {
+	final TreeExecution<INode<K, V>, K, V> getNode(Object k) {
 		if (comparator != null) {
 			getNodeWithComparator(k);
 		}
@@ -241,24 +239,24 @@ public class RBTree<K, V> implements ITree<K, V> {
 		@SuppressWarnings("unchecked")
 		Comparable<? super K> key = (Comparable<? super K>) k;
 
-		return new TreeExecution<Node<K, V>, K, V>() {	
+		return new TreeExecution<INode<K, V>, K, V>() {
 			private Node<K, V> node;
 			{
 				node = root;
 			}
-			
+
 			@Override
 			public void step() {
 				if (!works())
 					return;
-				
+
 				int cmp = key.compareTo(node.key);
-				
+
 				if (cmp < 0) {
 					node = node.leftChild;
 				} else {
 					node = node.rightChild;
-				}				
+				}
 			}
 
 			@Override
@@ -271,7 +269,7 @@ public class RBTree<K, V> implements ITree<K, V> {
 				while (works()) {
 					step();
 				}
-				
+
 				return node;
 			}
 
@@ -284,18 +282,23 @@ public class RBTree<K, V> implements ITree<K, V> {
 
 	@Override
 	public V get(K key) {
-		Node<K, V> e = getNode(key).getResult();
-		return e == null ? null : e.value;
+		INode<K, V> e = getNode(key).getResult();
+		return e == null ? null : e.getValue();
+	}
+
+	public TreeExecution<INode<K, V>, K, V> getVisual(K key) {
+		TreeExecution<INode<K, V>, K, V> e = getNode(key);
+		return e;
 	}
 
 	@Override
 	public V set(K key, V newVal) {
-		Node<K, V> e = getNode(key).getResult();
+		INode<K, V> e = getNode(key).getResult();
 		if (e == null) {
 			return null;
 		}
 
-		V old = e.value;
+		V old = e.getValue();
 		e.setValue(newVal);
 		return old;
 	}
@@ -438,27 +441,26 @@ public class RBTree<K, V> implements ITree<K, V> {
 		}
 		root.isRed = false;
 	}
-	
+
 	/**
-	 * Perform action to every node in tree.
-	 * Based on BFS.
+	 * Perform action to every node in tree. Based on BFS.
 	 * 
 	 * @param action
-	 * 		Action (function) to perform
+	 *            Action (function) to perform
 	 */
-	public void perform(Consumer<Node<K,V>> action) {
-		Queue<Node<K,V>> q = new LinkedList<Node<K,V>>();
+	public void perform(Consumer<Node<K, V>> action) {
+		Queue<Node<K, V>> q = new LinkedList<Node<K, V>>();
 		q.add(root);
-		
-		Node<K,V> n = null;
+
+		Node<K, V> n = null;
 		while (!q.isEmpty()) {
 			n = q.remove();
 			action.accept(n);
-			
+
 			if (n.leftChild != null) {
 				q.add(n.leftChild);
 			}
-			
+
 			if (n.rightChild != null) {
 				q.add(n.rightChild);
 			}

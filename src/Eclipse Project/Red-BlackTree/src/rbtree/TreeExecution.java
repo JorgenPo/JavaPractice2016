@@ -7,16 +7,17 @@ import rbtree.ITree.INode;
  * 
  * @author ploskov
  *
- * @param <T> Return type
+ * @param <T>
+ *            Return type
  * @param <K>
  * @param <V>
  */
-public interface TreeExecution<T, K, V> {	
+public interface TreeExecution<T, K, V> {
 	public void step();
-	
+
 	public boolean works();
-	
+
 	public T getResult();
-	
+
 	public INode<K, V> getNode();
 }

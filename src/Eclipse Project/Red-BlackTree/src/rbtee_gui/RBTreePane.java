@@ -24,6 +24,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
@@ -36,16 +37,15 @@ import java.util.HashMap;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import rbtree.*;
 import rbtree.ITree.INode;
-import images.*;
 
 /**
- * TODO Add declaration. GUI Class ...
+ * RBTreePane class realize GUI. User can insight as arranged red-black tree
+ * using buttons on the scene.
  * 
  * @author COMar-PC
  */
@@ -59,24 +59,22 @@ public class RBTreePane extends BorderPane {
 	private Label labelStatus;
 	private Separator separatorFieldsButtons;
 	private Button btnAddElement, btnGetElement, btnStepPrev, btnStepNext;
-	private Button btnOpenFile, btnSaveToFile, btnLockToolBar;
+	private Button btnOpenFile, btnSaveToFile;
 	private ToggleButton btnVisualize;
 	private TextField txtFieldKey, txtFieldValue;
 	private TextArea txtArea;
-	
+
 	// For graphics
 	private Group graphicGroup;
-
 	private RBTree<String, String> mainTree;
-
 	private HashMap<String, Integer> keyIndex;
-
-	// TODO Delete it. Test items.
-	private Button testBtnChangeColor;
+	private TreeExecution<INode<String, String>, String, String> treeByStep;
 
 	/**
-	 * TODO Add declaration of starting method.
+	 * The main entry point of the application.
 	 * 
+	 * @param primaryStage
+	 *            the primary stage for application
 	 * @throws Exception
 	 */
 	public void start(final Stage primaryStage) throws Exception {
@@ -100,23 +98,21 @@ public class RBTreePane extends BorderPane {
 	}
 
 	/**
-	 * Opens file save dialog in your system and save the tree in
-	 * selected file
+	 * Opens file save dialog in your system and save the tree in selected file
 	 * 
 	 * @param tree
-	 * 		Tree to save
+	 *            Tree to save
 	 * @param mainStage
-	 * 		Main stage (window)
+	 *            Main stage (window)
 	 */
-	private <K,V> void saveTree(RBTree<K,V> tree, final Stage mainStage) {
+	private <K, V> void saveTree(RBTree<K, V> tree, final Stage mainStage) {
 		FileChooser fc = new FileChooser();
 		fc.setTitle("Сохранение дерева");
-		
-		fc.getExtensionFilters().addAll( 
-				new ExtensionFilter("Graph files", "*.graph"),
+
+		fc.getExtensionFilters().addAll(new ExtensionFilter("Graph files", "*.graph"),
 				new ExtensionFilter("Text files", "*.txt"));
 		fc.setInitialDirectory(new File(System.getProperty("user.dir")));
-		
+
 		File file = fc.showSaveDialog(mainStage);
 		if (file != null) {
 			Utills.saveTreeToFile(tree, file.getAbsolutePath());
@@ -125,16 +121,15 @@ public class RBTreePane extends BorderPane {
 			labelStatus.setText("Tree has not been saved! (canceled)");
 		}
 	}
-	
+
 	private void loadTree(final Stage mainStage) {
 		FileChooser fc = new FileChooser();
 		fc.setTitle("Загрузка дерева");
-		
-		fc.getExtensionFilters().addAll( 
-				new ExtensionFilter("Graph files", "*.graph"),
+
+		fc.getExtensionFilters().addAll(new ExtensionFilter("Graph files", "*.graph"),
 				new ExtensionFilter("Text files", "*.txt"));
 		fc.setInitialDirectory(new File(System.getProperty("user.dir")));
-		
+
 		File file = fc.showOpenDialog(mainStage);
 		if (file != null) {
 			this.mainTree = Utills.loadTreeFromFile(file.getAbsolutePath());
@@ -144,7 +139,7 @@ public class RBTreePane extends BorderPane {
 			labelStatus.setText("Tree has not been loaded!");
 		}
 	}
-	
+
 	/**
 	 * Locates panes in the right place.
 	 */
@@ -231,7 +226,7 @@ public class RBTreePane extends BorderPane {
 		btnSaveToFile.setOnAction((ae) -> {
 			resetTree();
 			labelStatus.setText("Save to file clicked.");
-			if (this.mainTree.getSize() != 0) { 
+			if (this.mainTree.getSize() != 0) {
 				saveTree(this.mainTree, mainStage);
 			}
 		});
@@ -243,17 +238,8 @@ public class RBTreePane extends BorderPane {
 		btnVisualize.setSelected(true);
 		// Separate Visual buttons and other items.
 		Separator separatorVisual = new Separator(Orientation.VERTICAL);
-		// TODO Delete it. Test lock button
-		btnLockToolBar = new Button("Lock");
-		btnLockToolBar.setOnAction((ae) -> {
-			resetTree();
-			labelStatus.setText("Lock clicked.");
-			// setDisableButtons(vbLeft);
-			chooseButtonSet("ControlButtons");
-		});
 
-		ToolBar toolBar = new ToolBar(btnOpenFile, btnSaveToFile, separatorFile, btnVisualize, separatorVisual,
-				btnLockToolBar);
+		ToolBar toolBar = new ToolBar(btnOpenFile, btnSaveToFile, separatorFile, btnVisualize, separatorVisual);
 		toolBar.setPadding(new Insets(3, 20, 5, 10));
 
 		return toolBar;
@@ -267,41 +253,13 @@ public class RBTreePane extends BorderPane {
 	 */
 	private VBox makeNodeCenter() {
 		// Label of the graph
-		Label labelGraph = new Label("Graph of RBTree. (Test version of graphics..)");
+		Label labelGraph = new Label("Graph of RBTree.");
+		labelGraph.setFont(new Font(16));
 		// Graphic
-		/*
-		 * Canvas canvasGraphOfRBTree = new Canvas(400, 400); // Canvas for
-		 * RBTree's painting. gc = canvasGraphOfRBTree.getGraphicsContext2D();
-		 * // TODO Remove graphics items. gc.strokeLine(0, 0, 200, 200);
-		 * gc.strokeOval(100, 100, 200, 200); gc.strokeRect(0, 200, 50, 200);
-		 * gc.fillOval(0, 0, 20, 20); gc.fillRect(100, 320, 300, 40);
-		 * gc.setFont(new Font(20)); gc.fillText("Text", 60, 50);
-		 */
-
-		/*
-		 * TODO Delete it. Check before. Really exciting. Example.
-		 *
-		 * Random random = new Random(System.currentTimeMillis()); for (int i =
-		 * 0; i < 500; i++) { Text text = new Text(random.nextInt((int)
-		 * getWidth()), random.nextInt((int) getHeight()), new
-		 * Character((char)random.nextInt(255)).toString());
-		 * text.setFont(Font.font("Serif", random.nextInt(30)));
-		 * text.setFill(Color.rgb(random.nextInt(255), random.nextInt(255),
-		 * random.nextInt(255), 0.5)); graphicGroup.getChildren().add(text); }
-		 * 
-		 * Text text2 = new Text(60, getHeight() / 2, "Graphics is Fun!");
-		 * text2.setFont(Font.font("Serif", FontWeight.EXTRA_BOLD,
-		 * FontPosture.REGULAR, 60)); text2.setFill(Color.RED);
-		 * text2.setFontSmoothingType(FontSmoothingType.LCD); DropShadow shadow
-		 * = new DropShadow(); shadow.setOffsetX(2.0f); shadow.setOffsetY(2.0f);
-		 * shadow.setColor(Color.BLACK); shadow.setRadius(7);
-		 * text2.setEffect(shadow); text2.setStroke(Color.DARKRED);
-		 * graphicGroup.getChildren().add(text2);
-		 */
-
 		Parent zoomGraphicPane = createZoomPane(graphicGroup);
 
 		VBox centerPane = new VBox(10);
+		centerPane.setPrefWidth(500);
 		centerPane.setPadding(new Insets(5, 20, 10, 5));
 		VBox.setVgrow(zoomGraphicPane, Priority.ALWAYS);
 		centerPane.getChildren().setAll(labelGraph, zoomGraphicPane);
@@ -309,6 +267,13 @@ public class RBTreePane extends BorderPane {
 		return centerPane;
 	}
 
+	/**
+	 * Add action zoom for group of elements.
+	 * 
+	 * @param group
+	 *            group is zoomed by that action
+	 * @return zoomed pane with group of elements
+	 */
 	private Parent createZoomPane(Group group) {
 		final double SCALE_DELTA = 1.1;
 		final StackPane zoomPane = new StackPane();
@@ -352,7 +317,6 @@ public class RBTreePane extends BorderPane {
 		labelKey.setMinWidth(38);
 		txtFieldKey = new TextField();
 		txtFieldKey.setPrefWidth(50);
-		txtFieldKey.setMaxWidth(50);
 		HBox hbLeftKey = new HBox();
 		hbLeftKey.setAlignment(Pos.BASELINE_CENTER);
 		hbLeftKey.getChildren().addAll(labelKey, txtFieldKey);
@@ -361,7 +325,6 @@ public class RBTreePane extends BorderPane {
 		labelValue.setMinWidth(38);
 		txtFieldValue = new TextField();
 		txtFieldValue.setPrefWidth(50);
-		txtFieldValue.setMaxWidth(50);
 		HBox hbLeftValue = new HBox();
 		hbLeftValue.setAlignment(Pos.BASELINE_CENTER);
 		hbLeftValue.getChildren().addAll(labelValue, txtFieldValue);
@@ -378,29 +341,7 @@ public class RBTreePane extends BorderPane {
 		btnAddElement.setMaxWidth(Double.MAX_VALUE);
 		btnStepNext = new Button(">>");
 		btnGetElement.setMaxWidth(Double.MAX_VALUE);
-		// TODO Delete it. Testing button_changeColor
-		testBtnChangeColor = new Button("TESTING");
-		testBtnChangeColor.setMaxWidth(Double.MAX_VALUE);
-		testBtnChangeColor.setOnAction((ae) -> {
-			resetTree();
-			/*
-			 * if (!txtFieldKey.getText().isEmpty()) {
-			 * mainTree.containsKey(txtFieldKey.getText()); }
-			 */
-			// setDisableButtons(toolBar);
-			chooseButtonSet("StepButtons");
-		});
-		Button btnContainsKey = new Button("Contains key?");
-		btnContainsKey.setMaxWidth(Double.MAX_VALUE);
-		btnContainsKey.setOnAction((ae) -> {
-			resetTree();
-			// TODO Need uncomment.
-			/*
-			 * if (!txtFieldKey.getText().isEmpty()) {
-			 * mainTree.containsKey(txtFieldKey.getText()); }
-			 */
-			setDisableButtons(toolBar);
-		});
+
 		// Text area
 		txtArea = new TextArea();
 		txtArea.setMaxWidth(100);
@@ -432,9 +373,35 @@ public class RBTreePane extends BorderPane {
 				String strValue = mainTree.get(strKey);
 				if (strValue == null) {
 					txtArea.appendText("\nKey is not found.\nPlease try again.");
+					return;
 				} else {
 					txtArea.appendText("\nValue = " + strValue);
 				}
+				if (btnVisualize.isSelected()) {
+					txtArea.appendText("\nVisual mode:\n");
+					treeByStep = mainTree.getVisual(strKey);
+					chooseButtonSet("StepButtons");
+					setDisableButtons(toolBar);
+					VertexGroup vertex = (VertexGroup) graphicGroup.getChildren()
+							.get(keyIndex.get(treeByStep.getNode().getKey()));
+					vertex.setSelected();
+					txtArea.appendText("Root = " + treeByStep.getNode().getKey() + "\nAlgorithm (get):\n");
+				}
+			}
+		});
+		btnStepNext.setOnAction((ae) -> {
+			VertexGroup vertex = (VertexGroup) graphicGroup.getChildren()
+					.get(keyIndex.get(treeByStep.getNode().getKey()));
+			vertex.reset();
+			if (treeByStep.works()) {
+				treeByStep.step();
+				vertex = (VertexGroup) graphicGroup.getChildren().get(keyIndex.get(treeByStep.getNode().getKey()));
+				vertex.setSelected();
+				txtArea.appendText(treeByStep.getNode().getKey() + "\n");
+			} else {
+				txtArea.appendText("End.\n");
+				chooseButtonSet("ControlButtons");
+				setDisableButtons(toolBar);
 			}
 		});
 
@@ -444,8 +411,7 @@ public class RBTreePane extends BorderPane {
 		leftPane.setVgap(8);
 		leftPane.setAlignment(Pos.BASELINE_CENTER);
 		leftPane.getChildren().addAll(hbLeftKey, hbLeftValue, separatorFieldsButtons, btnAddElement, btnGetElement,
-				btnContainsKey, testBtnChangeColor, txtArea);
-		leftPane.setMinHeight(409);
+				txtArea);
 		return leftPane;
 	}
 
@@ -588,11 +554,20 @@ public class RBTreePane extends BorderPane {
 		}
 	}
 
+	/**
+	 * Vertex set selected by specified key.
+	 * 
+	 * @param key
+	 *            key to select vertex
+	 */
 	public void setSelectedByKey(String key) {
 		VertexGroup vert = (VertexGroup) graphicGroup.getChildren().get(keyIndex.get(key));
 		vert.setSelected();
 	}
 
+	/**
+	 * Reset to default colors of all vertex groups in the graphic group.
+	 */
 	private void resetTree() {
 		if (graphicGroup.getChildren().isEmpty())
 			return;
