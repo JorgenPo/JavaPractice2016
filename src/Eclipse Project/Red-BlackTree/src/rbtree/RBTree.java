@@ -1,8 +1,6 @@
 package rbtree;
 
 import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.Queue;
 import java.util.Stack;
 
 import javafx.application.Platform;
