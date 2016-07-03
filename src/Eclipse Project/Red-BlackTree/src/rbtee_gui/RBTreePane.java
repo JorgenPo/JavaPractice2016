@@ -137,7 +137,7 @@ public class RBTreePane extends BorderPane {
 		
 		File file = fc.showOpenDialog(mainStage);
 		if (file != null) {
-			this.mainTree = Utills.loadTreeFromFile(file.getName());
+			this.mainTree = Utills.loadTreeFromFile(file.getAbsolutePath());
 			labelStatus.setText("Tree loaded from " + file);
 			paintRBTree();
 		} else {
