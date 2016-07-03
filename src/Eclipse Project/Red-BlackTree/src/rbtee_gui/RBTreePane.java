@@ -119,6 +119,7 @@ public class RBTreePane extends BorderPane {
 		
 		File file = fc.showSaveDialog(mainStage);
 		if (file != null) {
+			Utills.saveTreeToFile(tree, file.getName());
 			labelStatus.setText("Tree saved to " + file);
 		} else {
 			labelStatus.setText("Tree has not been saved! (canceled)");
