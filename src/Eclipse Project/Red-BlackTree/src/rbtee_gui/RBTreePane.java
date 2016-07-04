@@ -68,7 +68,8 @@ public class RBTreePane extends BorderPane {
 	private Group graphicGroup;
 	private RBTree<String, String> mainTree;
 	private HashMap<String, Integer> keyIndex;
-	private TreeExecution<INode<String, String>, String, String> treeByStep;
+	private TreeExecution<INode<String, String>, String, String> treeGetByStep;
+	private TreeExecution<String, String, String> treeAddByStep;
 
 	/**
 	 * The main entry point of the application.
@@ -351,15 +352,48 @@ public class RBTreePane extends BorderPane {
 		// Actions
 		btnAddElement.setOnAction((ae) -> {
 			resetTree();
-			if ((txtFieldKey.getText().isEmpty()) || (txtFieldValue.getText().isEmpty())) {
-				labelStatus.setText("Error when try AddElement. Please check Key or Value!");
+			txtArea.clear();
+			if (txtFieldKey.getText().isEmpty()) {
+				labelStatus.setText("Error when try to put new element. Please check key and value fields!");
 			} else {
 				labelStatus.setText("Status bar...");
 				String key = txtFieldKey.getText();
-				mainTree.put(key, txtFieldValue.getText());
-				if (btnVisualize.isSelected())
+				String value = txtFieldValue.getText();
+				txtArea.appendText("Put element:\nKey = " + key + "\nValue = " + value);
+				if (!btnVisualize.isSelected()) {
+					String oldValue = mainTree.put(key, value);
+					if (oldValue == null) {
+						txtArea.appendText("\nOld element not found, creating new element...");
+					} else {
+						txtArea.appendText("\nOld element's value = " + oldValue);
+					}
 					paintRBTree();
+				} else {
+					txtArea.appendText("\nVisual mode:\n");
+					treeAddByStep = mainTree.putVisual(key, value);
+					treeGetByStep = null;
+					chooseButtonSet("StepButtons");
+					setDisableButtons(toolBar);
+					if (mainTree.getSize() > 0) {
+						if (!treeAddByStep.works()) {
+							paintRBTree();
+						}
+						VertexGroup vertex = (VertexGroup) graphicGroup.getChildren()
+								.get(keyIndex.get(treeAddByStep.getNode().getKey()));
+						vertex.setSelected();
+					}
+					txtArea.appendText("Root = " + treeAddByStep.getNode().getKey() + "\nAlgorithm (put):\n");
+				}
 			}
+			/*
+			 * if ((txtFieldKey.getText().isEmpty()) ||
+			 * (txtFieldValue.getText().isEmpty())) { labelStatus.
+			 * setText("Error when try AddElement. Please check Key or Value!");
+			 * } else { labelStatus.setText("Status bar..."); String key =
+			 * txtFieldKey.getText(); mainTree.put(key,
+			 * txtFieldValue.getText()); if (btnVisualize.isSelected())
+			 * paintRBTree(); }
+			 */
 		});
 		btnGetElement.setOnAction((ae) -> {
 			resetTree();
@@ -379,29 +413,56 @@ public class RBTreePane extends BorderPane {
 				}
 				if (btnVisualize.isSelected()) {
 					txtArea.appendText("\nVisual mode:\n");
-					treeByStep = mainTree.getVisual(strKey);
+					treeGetByStep = mainTree.getVisual(strKey);
+					treeAddByStep = null;
 					chooseButtonSet("StepButtons");
 					setDisableButtons(toolBar);
 					VertexGroup vertex = (VertexGroup) graphicGroup.getChildren()
-							.get(keyIndex.get(treeByStep.getNode().getKey()));
+							.get(keyIndex.get(treeGetByStep.getNode().getKey()));
 					vertex.setSelected();
-					txtArea.appendText("Root = " + treeByStep.getNode().getKey() + "\nAlgorithm (get):\n");
+					txtArea.appendText("Root = " + treeGetByStep.getNode().getKey() + "\nAlgorithm (get):\n");
 				}
 			}
 		});
 		btnStepNext.setOnAction((ae) -> {
-			VertexGroup vertex = (VertexGroup) graphicGroup.getChildren()
-					.get(keyIndex.get(treeByStep.getNode().getKey()));
-			vertex.reset();
-			if (treeByStep.works()) {
-				treeByStep.step();
-				vertex = (VertexGroup) graphicGroup.getChildren().get(keyIndex.get(treeByStep.getNode().getKey()));
-				vertex.setSelected();
-				txtArea.appendText(treeByStep.getNode().getKey() + "\n");
+			if (treeGetByStep != null) {
+				VertexGroup vertex = (VertexGroup) graphicGroup.getChildren()
+						.get(keyIndex.get(treeGetByStep.getNode().getKey()));
+				vertex.reset();
+				if (treeGetByStep.works()) {
+					treeGetByStep.step();
+					vertex = (VertexGroup) graphicGroup.getChildren()
+							.get(keyIndex.get(treeGetByStep.getNode().getKey()));
+					vertex.setSelected();
+					txtArea.appendText(treeGetByStep.getNode().getKey() + "\n");
+				} else {
+					txtArea.appendText("End.\n");
+					chooseButtonSet("ControlButtons");
+					setDisableButtons(toolBar);
+				}
 			} else {
-				txtArea.appendText("End.\n");
-				chooseButtonSet("ControlButtons");
-				setDisableButtons(toolBar);
+				VertexGroup vertex;
+				if (mainTree.getSize() > 0) {
+					vertex = (VertexGroup) graphicGroup.getChildren()
+							.get(keyIndex.get(treeAddByStep.getNode().getKey()));
+					vertex.reset();
+				}
+				int oldSize = mainTree.getSize();
+
+				if (treeAddByStep.works()) {
+					treeAddByStep.step();
+					if (oldSize < mainTree.getSize()) {
+						paintRBTree();
+					}
+					vertex = (VertexGroup) graphicGroup.getChildren()
+							.get(keyIndex.get(treeAddByStep.getNode().getKey()));
+					vertex.setSelected();
+					txtArea.appendText(treeAddByStep.getNode().getKey() + "\n");
+				} else {
+					txtArea.appendText("End.\n");
+					chooseButtonSet("ControlButtons");
+					setDisableButtons(toolBar);
+				}
 			}
 		});
 

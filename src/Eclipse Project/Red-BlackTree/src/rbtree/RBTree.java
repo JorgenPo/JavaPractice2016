@@ -202,7 +202,6 @@ public class RBTree<K, V> implements ITree<K, V> {
 					if (key == null) {
 						throw new NullPointerException();
 					}
-					comp = (Comparator<? super K>) key;
 				} else {
 					comp = comparator;
 				}
@@ -213,7 +212,15 @@ public class RBTree<K, V> implements ITree<K, V> {
 				if (works()) {
 					Node<K, V> node;
 
-					if (comp.compare(key, parent.key) < 0) {
+					int cmp;
+					if (comparator != null) {
+						cmp = comparator.compare(key, parent.key);
+					} else {
+						Comparable<? super K> k = (Comparable<? super K>) key;
+						cmp = k.compareTo(parent.key);
+					}
+
+					if (cmp < 0) {
 						node = parent.leftChild;
 					} else {
 						node = parent.rightChild;
@@ -222,7 +229,7 @@ public class RBTree<K, V> implements ITree<K, V> {
 					if (node == null) {
 						node = new Node<K, V>(key, value, parent);
 
-						if (comp.compare(key, parent.key) < 0) {
+						if (cmp < 0) {
 							parent.leftChild = node;
 						} else {
 							parent.rightChild = node;
@@ -230,6 +237,7 @@ public class RBTree<K, V> implements ITree<K, V> {
 
 						balanceAfterInsertion(node);
 						parent = node;
+						++size;
 					} else {
 						parent = node;
 					}
@@ -238,8 +246,15 @@ public class RBTree<K, V> implements ITree<K, V> {
 
 			@Override
 			public boolean works() {
-
-				return parent != null && comp.compare(key, parent.key) != 0;
+				int cmp;
+				if (comparator != null) {
+					cmp = comparator.compare(key, parent.key);
+				} else {
+					Comparable<? super K> k = (Comparable<? super K>) key;
+					cmp = k.compareTo(parent.key);
+				}
+				
+				return parent != null && cmp != 0;
 			}
 
 			@Override
