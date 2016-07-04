@@ -4,7 +4,6 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.function.Consumer;
-
 import rbtee_gui.RBTreePane;
 
 public class RBTree<K, V> implements ITree<K, V> {
@@ -162,6 +161,101 @@ public class RBTree<K, V> implements ITree<K, V> {
 		balanceAfterInsertion(n);
 		++size;
 		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	public TreeExecution<V, K, V> putVisual(K key, V value) {
+		if (root == null) {
+			root = new Node<>(key, value, null);
+			size = 1;
+
+			return new TreeExecution<V, K, V>() {
+				@Override
+				public void step() {
+					// nothing to do
+				}
+
+				@Override
+				public boolean works() {
+					return false;
+				}
+
+				@Override
+				public V getResult() {
+					return null;
+				}
+
+				@Override
+				public rbtree.ITree.INode<K, V> getNode() {
+					return root;
+				}
+			};
+		}
+
+		return new TreeExecution<V, K, V>() {
+			private Node<K, V> parent;
+			private Comparator<? super K> comp;
+			{
+				parent = root;
+
+				if (comparator == null) {
+					if (key == null) {
+						throw new NullPointerException();
+					}
+					comp = (Comparator<? super K>) key;
+				} else {
+					comp = comparator;
+				}
+			}
+
+			@Override
+			public void step() {
+				if (works()) {
+					Node<K, V> node;
+
+					if (comp.compare(key, parent.key) < 0) {
+						node = parent.leftChild;
+					} else {
+						node = parent.rightChild;
+					}
+
+					if (node == null) {
+						node = new Node<K, V>(key, value, parent);
+
+						if (comp.compare(key, parent.key) < 0) {
+							parent.leftChild = node;
+						} else {
+							parent.rightChild = node;
+						}
+
+						balanceAfterInsertion(node);
+						parent = node;
+					} else {
+						parent = node;
+					}
+				}
+			}
+
+			@Override
+			public boolean works() {
+
+				return parent != null && comp.compare(key, parent.key) != 0;
+			}
+
+			@Override
+			public V getResult() {
+				if (parent == null) {
+					return null;
+				}
+
+				return parent.value;
+			}
+
+			@Override
+			public rbtree.ITree.INode<K, V> getNode() {
+				return parent;
+			}
+		};
 	}
 
 	@Override
